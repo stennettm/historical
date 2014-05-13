@@ -1,5 +1,4 @@
 (function() {
-
     var mongoose = require('mongoose'),
         _ = require('underscore'),
         Schema = mongoose.Schema,
@@ -22,6 +21,7 @@
 
             return models[model.constructor.modelName];
         };
+
         schema.pre('save', function (next) {
             var me = this,
                 HistoricalModel = getHistoricalModel(me),
@@ -46,14 +46,14 @@
                 surrogate = {};
 
             HistoricalModel.find({timestamp: {$lte: date}, document: me.id}, function (e, objs) {
-                if (!objs) {
-                    if (callback)
-                        callback(new Error("No history found."));
+                if(e){
+                    if(callback)
+                        callback(e);
                     return;
                 }
-                if (e) {
-                    if (callback)
-                        callback(e);
+                if(!objs){
+                    if(callback)
+                        callback(new Error("No historical data found."));
                     return;
                 }
 
@@ -68,5 +68,4 @@
             });
         };
     }
-
 }).call(this);
