@@ -2,7 +2,7 @@ Historical
 ==========
 
 A simple yet helpful Mongoose plugin that records document changes as they occur, and provides
-a method of restoring documents to a previous point in time.
+a method for restoring documents to a previous point in time.
 
 This package is currently under development, and should be considered unstable.
 
