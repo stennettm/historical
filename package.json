@@ -1,12 +1,12 @@
 {
     "name" : "historical",
-    "description" : "A history helper for Mongoose",
+    "description" : "A simple yet helpful Mongoose plugin that records document changes as they occur, and provides a method of restoring documents to a previous point in time.",
     "homepage" : "https://github.com/stennettm/historical",
     "keywords" : ["mongoose", "history", "express"],
     "author" : "Matthew Stennett <matt@stennett.com>",
     "repository" : {"type": "git", "url": "git://github.com/stennettm/historical.git"},
     "main" : "historical.js",
-    "version" : "0.0.2",
+    "version" : "0.0.3",
     "devDependencies": {
         "underscore": "1.6.x",
         "mongoose": "3.8.x"
