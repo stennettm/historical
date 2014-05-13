@@ -19,8 +19,8 @@ mySchema.plugin(require('historical'));
 ```
 
 ```vim
-myModel.historical(new Date('Aug 9, 2003'), function(e, obj){
-   console.log("Here's how my model looked in 2003: "+obj);
+myModel.historical(new Date('2010-08-17T12:09:36'), function(e, obj){
+   console.log("Here's how my model looked in 2010: "+obj);
    obj.save();
 });
 ```
