@@ -6,6 +6,11 @@ a method for restoring documents to a previous point in time.
 
 This package is currently under development and should be considered unstable.
 
+Installation
+------------
+
+`npm install historical`
+
 Usage
 -----
 
