@@ -5,6 +5,8 @@
         ObjectId = Schema.Types.ObjectId,
         models = [];
 
+    _.mixin(require('underscore.deep'));
+
     module.exports = function(schema, options) {
         options = options || {};
 
@@ -22,15 +24,40 @@
             return models[model.constructor.modelName];
         };
 
+        var read = function(o, p){
+            for(var i = 0, a = p.split('.'),l = a.length;i < l; i++){o = o[a[i]];}
+            return o;
+        };
+
+        var write = function(o, p, v){
+            for(var i = 0, a = p.split('.'); i < a.length - 1; i++){
+                var n = a[i];
+                if(n in o){
+                    o = o[n];
+                } else {
+                    o[n] = {};
+                    o = o[n];
+                }
+            }
+            o[a[a.length - 1]] = v;
+        };
+
         schema.pre('save', function (next) {
             var me = this,
                 HistoricalModel = getHistoricalModel(me),
-                modified = this.modifiedPaths(),
-                diff = _.pick(me.toObject(), modified);
+                modified = _.uniq(this.modifiedPaths()),
+                diff = {};
 
-            modified.forEach(function (index) {
-                if (diff[index] === undefined)
-                    diff[index] = null;
+            modified.forEach(function(index){
+                var value = read(me, index);
+                if(typeof value == 'object'){
+                    return;
+                }
+                if(value === undefined){
+                    write(diff, index, null);
+                    return;
+                }
+                write(diff, index, value);
             });
 
             var historical = new HistoricalModel({
@@ -40,32 +67,87 @@
             historical.save(next);
         });
 
-        schema.methods.historical = function (date, callback) {
+        schema.methods.historical = function(){
             var me = this,
+                action = null,
+                date = new Date(),
+                callback = function(){},
+                args = Array.prototype.slice.call(arguments, 0, 3),
                 HistoricalModel = getHistoricalModel(me),
                 surrogate = {};
 
-            HistoricalModel.find({timestamp: {$lte: date}, document: me.id}, function (e, objs) {
-                if(e){
-                    if(callback)
-                        callback(e);
-                    return;
-                }
-                if(!objs){
-                    if(callback)
-                        callback(new Error("No historical data found."));
-                    return;
-                }
+            if(typeof args[0] == 'string'){
+                action = args[0];
+            }
 
-                objs.forEach(function (obj) {
-                    surrogate = _.extend(surrogate, obj.diff);
-                });
+            if(typeof args[1] == 'date'){
+                date = args[1];
+            }
 
-                var newObj = new me.constructor(surrogate);
-                newObj.id = me.id;
+            if(typeof args[args.length-1] == 'function'){
+                callback = args[args.length-1];
+            }
 
-                callback(undefined, newObj);
-            });
+            switch(action){
+                case 'snapshot':
+                    if(me.modifiedPaths().length){
+                        callback(new Error('Historical error: Attempted to snapshot an unsaved/modified document.'));
+                        return;
+                    }
+                    var historical = new HistoricalModel({
+                        document: me.id,
+                        diff: me.toObject()
+                    });
+                    historical.save(function(e, obj){
+                        if(e){
+                            callback(e);
+                            return;
+                        }
+                        callback(undefined, me);
+                    });
+                    break;
+                case 'clear':
+                    HistoricalModel.find({document: me.id}, function(e, objs){
+                        if(e){
+                            callback(e);
+                            return;
+                        }
+                        objs.forEach(function(obj){
+                            obj.remove();
+                        });
+                        me.historical('snapshot', callback);
+                    });
+                    break;
+                case 'restore':
+                    HistoricalModel.find({document: me.id, timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
+                        if(e){
+                            callback(e);
+                            return;
+                        }
+                        if(!objs){
+                            callback(new Error("Historical error: No history found before specified date."));
+                            return;
+                        }
+
+                        objs.forEach(function (obj) {
+                            surrogate = _.deepExtend(surrogate, obj.diff);
+                        });
+
+                        var newObj = new me.constructor(surrogate);
+                        newObj.id = me.id;
+                        callback(undefined, newObj);
+                    });
+                    break;
+                case 'history':
+                default:
+                    HistoricalModel.find({document: me.id, timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function(e, objs){
+                        if(e){
+                            callback(e);
+                            return;
+                        }
+                        callback(undefined, objs);
+                    });
+            }
         };
     }
 }).call(this);
