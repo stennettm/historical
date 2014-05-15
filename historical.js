@@ -112,10 +112,15 @@
                             callback(e);
                             return;
                         }
-                        objs.forEach(function(obj){
-                            obj.remove();
+                        me.historical('snapshot', function(e, obj){
+                            if(e){
+                                callback(e);
+                                return;
+                            }
+                            objs.forEach(function(obj){
+                                obj.remove();
+                            });
                         });
-                        me.historical('snapshot', callback);
                     });
                     break;
                 case 'restore':
