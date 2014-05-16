@@ -1,6 +1,6 @@
 {
     "name" : "historical",
-    "description" : "A simple yet helpful Mongoose plugin that records document changes as they occur and provides a method for restoring documents to a previous point in time.",
+    "description" : "A Mongoose plugin that archives document diffs and provides a method for restoring documents to any point in time.",
     "homepage" : "https://github.com/stennettm/historical",
     "keywords" : ["mongoose", "history", "express"],
     "author" : "Matthew Stennett <matt@stennett.com>",
