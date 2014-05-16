@@ -66,3 +66,8 @@ myDocument.historical('clear', function(e, obj){
    console.log(obj);
 });
 ```
+
+Todo
+-----
+
+* A method to restore an entire collection to any point in time.
