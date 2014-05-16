@@ -19,7 +19,7 @@ Attach the plugin.
 ```javascript
 //provide your desired mongoose connection and/or collection name
 var options = {connection: null, name: null};
-mySchema.plugin(require('historical'));
+mySchema.plugin(require('historical'), options);
 ```
 
 List all historical objects for my document.
