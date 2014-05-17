@@ -55,6 +55,7 @@ Trim up to a point in history.
 
 ```javascript
 myDocument.historical('trim', new Date('2010-08-17T12:09:36'), function(e, obj){
+   //any history before this time has been condensed into one document
    //my document as it was provided
    console.log(obj);
 });

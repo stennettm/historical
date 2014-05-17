@@ -157,6 +157,10 @@ module.exports = function (schema, options) {
                         callback(e);
                         return;
                     }
+                    if (!obj) {
+                        callback(undefined, me);
+                        return;
+                    }
                     HistoricalModel.remove({document: me.id, timestamp: {$lte: date}}, function(e){
                         if (e) {
                             callback(e);
