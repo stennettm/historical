@@ -45,7 +45,9 @@ Restore a document to a previous point in history.
 ```javascript
 myDocument.historical('restore', new Date('2010-08-17T12:09:36'), function(e, obj){
    //my document as it was in 2010
-   obj.save();
+   //or null if it didn't exist at the time
+   if(obj)
+      obj.save();
 });
 ```
 
