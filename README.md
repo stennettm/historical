@@ -51,7 +51,7 @@ myDocument.historical('restore', new Date('2010-08-17T12:09:36'), function(e, ob
 });
 ```
 
-Clear stored history up to a point in history.
+Trim up to a point in history.
 
 ```javascript
 myDocument.historical('trim', new Date('2010-08-17T12:09:36'), function(e, obj){
