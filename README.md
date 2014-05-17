@@ -49,11 +49,20 @@ myDocument.historical('restore', new Date('2010-08-17T12:09:36'), function(e, ob
 });
 ```
 
+Clear stored history previous to a point in time.
+
+```javascript
+myDocument.historical('trim', new Date('2010-08-17T12:09:36'), function(e, obj){
+   //my document as it was provided
+   console.log(obj);
+});
+```
+
 Take a complete and current snapshot of my document and store it in history. Unmodified documents only.
 
 ```javascript
 myDocument.historical('snapshot', function(e, obj){
-   //my document as it was for this snapshot
+   //my document as it was provided
    console.log(obj);
 });
 ```
@@ -62,12 +71,7 @@ Clear all history for my document and take a snapshot. Unmodified documents only
 
 ```javascript
 myDocument.historical('clear', function(e, obj){
-   //my document as it was for this snapshot and history clear
+   //my document as it was provided
    console.log(obj);
 });
 ```
-
-Todo
------
-
-* A method to restore an entire collection to any point in time.

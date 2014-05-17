@@ -83,7 +83,13 @@ module.exports = function (schema, options) {
         }
 
         if (typeof args[1] == 'date') {
-            date = args[1];
+            if(args[1].getTime() <= date.getTime()) {
+                date = args[1];
+            }
+            else {
+                callback(new Error('Historical error: Future date provided.'));
+                return;
+            }
         }
 
         if (typeof args[args.length - 1] == 'function') {
@@ -143,6 +149,32 @@ module.exports = function (schema, options) {
                     var newObj = new me.constructor(surrogate);
                     newObj.id = me.id;
                     callback(undefined, newObj);
+                });
+                break;
+            case 'trim':
+                me.historical('restore', date, function(e, obj){
+                    if (e) {
+                        callback(e);
+                        return;
+                    }
+                    HistoricalModel.remove({document: me.id, timestamp: {$lte: date}}, function(e){
+                        if (e) {
+                            callback(e);
+                            return;
+                        }
+                        var trimmed = new HistoricalModel({
+                            document: me.id,
+                            diff: obj.toObject(),
+                            timestamp: date
+                        });
+                        trimmed.save(function(e){
+                            if (e) {
+                                callback(e);
+                                return;
+                            }
+                            callback(undefined, me);
+                        });
+                    });
                 });
                 break;
             case 'history':
