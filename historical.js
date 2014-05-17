@@ -138,7 +138,7 @@ module.exports = function (schema, options) {
                         return;
                     }
                     if (!objs) {
-                        callback(new Error("Historical error: No history found before specified date."));
+                        callback(undefined, null);
                         return;
                     }
 
