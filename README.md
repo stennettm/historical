@@ -31,7 +31,7 @@ myDocument.historical(function(e, objs){
 });
 ```
 
-List historical objects for my document up to a certain Date.
+List historical objects for my document up to a point in history.
 
 ```javascript
 myDocument.historical('history', new Date('2010-08-17T12:09:36'), function(e, objs){
@@ -51,7 +51,7 @@ myDocument.historical('restore', new Date('2010-08-17T12:09:36'), function(e, ob
 });
 ```
 
-Clear stored history up to a point in time.
+Clear stored history up to a point in history.
 
 ```javascript
 myDocument.historical('trim', new Date('2010-08-17T12:09:36'), function(e, obj){
