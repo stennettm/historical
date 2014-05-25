@@ -128,6 +128,7 @@ module.exports = function (schema, options) {
                         objs.forEach(function (obj) {
                             obj.remove();
                         });
+                        callback(me);
                     });
                 });
                 break;
