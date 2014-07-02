@@ -76,7 +76,7 @@ module.exports = function (schema, options) {
             document: me.id,
             diff: null
         });
-        historical.remove(next);
+        historical.save(next);
     });
 
     schema.methods.historical = function () {
