@@ -68,6 +68,17 @@ module.exports = function (schema, options) {
         historical.save(next);
     });
 
+    schema.pre('remove', function (next) {
+        var me = this,
+            HistoricalModel = getHistoricalModel(me);
+
+        var historical = new HistoricalModel({
+            document: me.id,
+            diff: null
+        });
+        historical.save(next);
+    });
+
     schema.methods.historical = function () {
         var me = this,
             action = null,
