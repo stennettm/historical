@@ -115,7 +115,7 @@ module.exports = function (schema, options) {
                 }
                 return;
             }
-            me.historical('snapshot', function (e) {
+            me.historicalSnapshot(function (e) {
                 if (e) {
                     if (_.isFunction(callback)) {
                         callback(e);
@@ -159,8 +159,18 @@ module.exports = function (schema, options) {
             }
 
             objs.forEach(function (obj) {
-                surrogate = _.deepExtend(surrogate, obj.diff);
+                if(!obj.diff){
+                    surrogate = null;
+                }
+                else {
+                    surrogate = _.deepExtend(surrogate, obj.diff);
+                }
             });
+
+            if(!surrogate){
+                callback(null, null);
+                return;
+            }
 
             var newObj = new me.constructor(surrogate);
             newObj.id = me.id;
@@ -181,7 +191,7 @@ module.exports = function (schema, options) {
             return;
         }
 
-        me.historical('restore', date, function (e, obj) {
+        me.historicalRestore(date, function (e, obj) {
             if (e) {
                 if (_.isFunction(callback)) {
                     callback(e);
