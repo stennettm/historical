@@ -35,7 +35,7 @@ myDocument.historical(function(e, objs){
 List historical objects for my document up to a point in history.
 
 ```javascript
-myDocument.historical('history', new Date('2010-08-17T12:09:36'), function(e, objs){
+myDocument.historical('details', new Date('2010-08-17T12:09:36'), function(e, objs){
    //the list of historical changes for my document
    console.log(objs);
 });
