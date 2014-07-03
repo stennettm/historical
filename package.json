@@ -12,6 +12,9 @@
         "underscore.deep": "0.2.x",
         "mongoose": "3.8.x"
     },
+    "devDependencies": {
+        "expresso": "0.9.x"
+    },
     "licenses": [
         {
             "type": "MIT",
