@@ -11,7 +11,7 @@ var mongoose = require('mongoose'),
 TestSchema.plugin(require('../historical.js'));
 
 module.exports = {
-    'testNewDocument': function(beforeExit, assert) {
+    'testNewDocument': function (beforeExit, assert) {
         var connection = mongoose.createConnection('mongodb://localhost/historical_test'),
             TestModel = connection.model('test', TestSchema);
 
@@ -26,19 +26,19 @@ module.exports = {
                 }
             });
 
-        document.save(function(e, obj){
+        document.save(function (e, obj) {
             assert.isNull(e);
             assert.isDefined(obj);
 
-            obj.historical('history', function(e, history){
+            obj.historical('details', function (e, details) {
                 assert.isNull(e);
-                assert.type(history, 'object');
-                assert.equal(1, history.length);
+                assert.type(details, 'object');
+                assert.equal(1, details.length);
 
                 obj._id = undefined;
                 obj.__v = undefined;
 
-                assert.eql(obj.toObject(), history[0].diff);
+                assert.eql(obj.toObject(), details[0].diff);
 
                 connection.close();
             });
