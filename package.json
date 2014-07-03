@@ -18,5 +18,8 @@
             "url": "https://github.com/stennettm/historical/blob/master/LICENSE"
         }
     ],
-    "files" : ["historical.js", "LICENSE"]
+    "files" : ["historical.js", "LICENSE"],
+    "scripts": {
+        "test": "expresso test/*"
+    }
 }

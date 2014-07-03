@@ -51,7 +51,7 @@ module.exports = function (schema, options) {
 
         modified.forEach(function (index) {
             var value = read(me, index);
-            if (typeof value == 'object') {
+            if (typeof value == 'object' && !(value instanceof Array)) {
                 return;
             }
             if (value === undefined) {
@@ -122,7 +122,7 @@ module.exports = function (schema, options) {
                         callback(e);
                         return;
                     }
-                    callback(undefined, me);
+                    callback(null, me);
                 });
                 break;
             case 'clear':
@@ -139,7 +139,7 @@ module.exports = function (schema, options) {
                         objs.forEach(function (obj) {
                             obj.remove();
                         });
-                        callback(undefined, me);
+                        callback(null, me);
                     });
                 });
                 break;
@@ -150,7 +150,7 @@ module.exports = function (schema, options) {
                         return;
                     }
                     if (!objs) {
-                        callback(undefined, null);
+                        callback(null, null);
                         return;
                     }
 
@@ -160,7 +160,7 @@ module.exports = function (schema, options) {
 
                     var newObj = new me.constructor(surrogate);
                     newObj.id = me.id;
-                    callback(undefined, newObj);
+                    callback(null, newObj);
                 });
                 break;
             case 'trim':
@@ -188,7 +188,7 @@ module.exports = function (schema, options) {
                                 callback(e);
                                 return;
                             }
-                            callback(undefined, me);
+                            callback(null, me);
                         });
                     });
                 });
@@ -200,7 +200,7 @@ module.exports = function (schema, options) {
                         callback(e);
                         return;
                     }
-                    callback(undefined, objs);
+                    callback(null, objs);
                 });
         }
     };
