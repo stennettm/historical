@@ -79,22 +79,182 @@ module.exports = function (schema, options) {
         historical.save(next);
     });
 
+    schema.methods.historicalSnapshot = function (callback) {
+        var me = this,
+            HistoricalModel = getHistoricalModel(me);
+
+        if (me.modifiedPaths().length) {
+            callback(new Error('Historical error: Attempted to snapshot an unsaved/modified document.'));
+            return;
+        }
+        var historical = new HistoricalModel({
+            document: me.id,
+            diff: me.toObject()
+        });
+        historical.save(function (e) {
+            if (e) {
+                if (_.isFunction(callback)) {
+                    callback(e);
+                }
+                return;
+            }
+            if (_.isFunction(callback)) {
+                callback(null, me);
+            }
+        });
+    };
+
+    schema.methods.historicalClear = function (callback) {
+        var me = this,
+            HistoricalModel = getHistoricalModel(me);
+
+        HistoricalModel.find({document: me.id}, function (e, objs) {
+            if (e) {
+                if (_.isFunction(callback)) {
+                    callback(e);
+                }
+                return;
+            }
+            me.historical('snapshot', function (e) {
+                if (e) {
+                    if (_.isFunction(callback)) {
+                        callback(e);
+                    }
+                    return;
+                }
+                objs.forEach(function (obj) {
+                    obj.remove();
+                });
+                if (_.isFunction(callback)) {
+                    callback(null, me);
+                }
+            });
+        });
+    };
+
+    schema.methods.historicalRestore = function (date, callback) {
+        var me = this,
+            HistoricalModel = getHistoricalModel(me),
+            surrogate = {};
+
+        if (!_.isDate(date)) {
+            if (_.isFunction(callback)) {
+                callback(new Error('Historical error: Invalid date.'));
+            }
+            return;
+        }
+
+        HistoricalModel.find({document: me.id, timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
+            if (e) {
+                if (_.isFunction(callback)) {
+                    callback(e);
+                }
+                return;
+            }
+            if (!objs) {
+                if (_.isFunction(callback)) {
+                    callback(null, null);
+                }
+                return;
+            }
+
+            objs.forEach(function (obj) {
+                surrogate = _.deepExtend(surrogate, obj.diff);
+            });
+
+            var newObj = new me.constructor(surrogate);
+            newObj.id = me.id;
+            if (_.isFunction(callback)) {
+                callback(null, newObj);
+            }
+        });
+    };
+
+    schema.methods.historicalTrim = function (date, callback) {
+        var me = this,
+            HistoricalModel = getHistoricalModel(me);
+
+        if (!_.isDate(date)) {
+            if (_.isFunction(callback)) {
+                callback(new Error('Historical error: Invalid date.'));
+            }
+            return;
+        }
+
+        me.historical('restore', date, function (e, obj) {
+            if (e) {
+                if (_.isFunction(callback)) {
+                    callback(e);
+                }
+                return;
+            }
+            if (!obj) {
+                if (_.isFunction(callback)) {
+                    callback(null, me);
+                }
+                return;
+            }
+            HistoricalModel.remove({document: me.id, timestamp: {$lte: date}}, function (e) {
+                if (e) {
+                    if (_.isFunction(callback)) {
+                        callback(e);
+                    }
+                    return;
+                }
+                var trimmed = new HistoricalModel({
+                    document: me.id,
+                    diff: obj.toObject(),
+                    timestamp: date
+                });
+                trimmed.save(function (e) {
+                    if (e) {
+                        callback(e);
+                        return;
+                    }
+                    if (_.isFunction(callback)) {
+                        callback(null, me);
+                    }
+                });
+            });
+        });
+    };
+
+    schema.methods.historicalDetails = function (date, callback) {
+        var me = this,
+            HistoricalModel = getHistoricalModel(me);
+
+        if (!_.isDate(date)) {
+            if (_.isFunction(callback)) {
+                callback(new Error('Historical error: Invalid date.'));
+            }
+            return;
+        }
+
+        HistoricalModel.find({document: me.id, timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
+            if (e) {
+                callback(e);
+                return;
+            }
+            if (_.isFunction(callback)) {
+                callback(null, objs);
+            }
+        });
+    };
+
     schema.methods.historical = function () {
         var me = this,
             action = null,
             date = new Date(),
             callback = function () {
             },
-            args = Array.prototype.slice.call(arguments, 0, 3),
-            HistoricalModel = getHistoricalModel(me),
-            surrogate = {};
+            args = Array.prototype.slice.call(arguments, 0, 3);
 
         if (typeof args[0] == 'string') {
             action = args[0];
         }
 
         if (typeof args[1] == 'date') {
-            if(args[1].getTime() <= date.getTime()) {
+            if (args[1].getTime() <= date.getTime()) {
                 date = args[1];
             }
             else {
@@ -109,99 +269,21 @@ module.exports = function (schema, options) {
 
         switch (action) {
             case 'snapshot':
-                if (me.modifiedPaths().length) {
-                    callback(new Error('Historical error: Attempted to snapshot an unsaved/modified document.'));
-                    return;
-                }
-                var historical = new HistoricalModel({
-                    document: me.id,
-                    diff: me.toObject()
-                });
-                historical.save(function (e, obj) {
-                    if (e) {
-                        callback(e);
-                        return;
-                    }
-                    callback(null, me);
-                });
+                me.historicalSnapshot(callback);
                 break;
             case 'clear':
-                HistoricalModel.find({document: me.id}, function (e, objs) {
-                    if (e) {
-                        callback(e);
-                        return;
-                    }
-                    me.historical('snapshot', function (e, obj) {
-                        if (e) {
-                            callback(e);
-                            return;
-                        }
-                        objs.forEach(function (obj) {
-                            obj.remove();
-                        });
-                        callback(null, me);
-                    });
-                });
+                me.historicalClear(callback);
                 break;
             case 'restore':
-                HistoricalModel.find({document: me.id, timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
-                    if (e) {
-                        callback(e);
-                        return;
-                    }
-                    if (!objs) {
-                        callback(null, null);
-                        return;
-                    }
-
-                    objs.forEach(function (obj) {
-                        surrogate = _.deepExtend(surrogate, obj.diff);
-                    });
-
-                    var newObj = new me.constructor(surrogate);
-                    newObj.id = me.id;
-                    callback(null, newObj);
-                });
+                me.historicalRestore(date, callback);
                 break;
             case 'trim':
-                me.historical('restore', date, function(e, obj){
-                    if (e) {
-                        callback(e);
-                        return;
-                    }
-                    if (!obj) {
-                        callback(undefined, me);
-                        return;
-                    }
-                    HistoricalModel.remove({document: me.id, timestamp: {$lte: date}}, function(e){
-                        if (e) {
-                            callback(e);
-                            return;
-                        }
-                        var trimmed = new HistoricalModel({
-                            document: me.id,
-                            diff: obj.toObject(),
-                            timestamp: date
-                        });
-                        trimmed.save(function(e){
-                            if (e) {
-                                callback(e);
-                                return;
-                            }
-                            callback(null, me);
-                        });
-                    });
-                });
+                me.historicalTrim(date, callback);
                 break;
             case 'history':
+            case 'details':
             default:
-                HistoricalModel.find({document: me.id, timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
-                    if (e) {
-                        callback(e);
-                        return;
-                    }
-                    callback(null, objs);
-                });
+                me.historicalDetails(date, callback);
         }
     };
 };
