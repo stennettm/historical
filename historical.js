@@ -137,7 +137,7 @@ module.exports = function (schema, options) {
             HistoricalModel = getHistoricalModel(me),
             surrogate = {};
 
-        if (!_.isDate(date) || date.getTime() <= new Date().getTime()) {
+        if (!_.isDate(date) || date.getTime() > new Date().getTime()) {
             if (_.isFunction(callback)) {
                 callback(new Error('Historical error: Invalid date.'));
             }
@@ -184,7 +184,7 @@ module.exports = function (schema, options) {
         var me = this,
             HistoricalModel = getHistoricalModel(me);
 
-        if (!_.isDate(date) || date.getTime() <= new Date().getTime()) {
+        if (!_.isDate(date) || date.getTime() > new Date().getTime()) {
             if (_.isFunction(callback)) {
                 callback(new Error('Historical error: Invalid date.'));
             }
@@ -233,7 +233,7 @@ module.exports = function (schema, options) {
         var me = this,
             HistoricalModel = getHistoricalModel(me);
 
-        if (!_.isDate(date) || date.getTime() <= new Date().getTime()) {
+        if (!_.isDate(date) || date.getTime() > new Date().getTime()) {
             if (_.isFunction(callback)) {
                 callback(new Error('Historical error: Invalid date.'));
             }
