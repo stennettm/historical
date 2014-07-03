@@ -51,7 +51,7 @@ module.exports = function (schema, options) {
 
         modified.forEach(function (index) {
             var value = read(me, index);
-            if (typeof value == 'object' && !(value instanceof Array)) {
+            if (typeof value == 'object' && !_.isArray(value)) {
                 return;
             }
             if (value === undefined) {
