@@ -1,5 +1,4 @@
 [![Build Status](https://secure.travis-ci.org/stennettm/historical.png)](http://travis-ci.org/stennettm/historical)
-
 Historical
 ==========
 
