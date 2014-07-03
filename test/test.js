@@ -1,4 +1,6 @@
-var mongoose = require('mongoose'),
+var assert = require("assert"),
+    _ = require('underscore'),
+    mongoose = require('mongoose'),
     TestSchema = new mongoose.Schema({
         testString: String,
         testNumber: Number,
@@ -10,38 +12,63 @@ var mongoose = require('mongoose'),
     });
 TestSchema.plugin(require('../historical.js'));
 
-module.exports = {
-    'testNewDocument': function (beforeExit, assert) {
-        var connection = mongoose.createConnection('mongodb://localhost/historical_test'),
-            TestModel = connection.model('test', TestSchema);
+var connection = mongoose.createConnection('mongodb://localhost/historical_test'),
+    TestModel = connection.model('test', TestSchema);
 
-        var test = this,
-            document = new TestModel({
-                testString: 'test',
-                testNumber: 42,
-                testArray: ['test1', 'test2'],
-                testBoolean: true,
-                testObject: {
-                    testObjectElement: 'test message'
-                }
-            });
+var uniqueId = _.uniqueId();
 
-        document.save(function (e, obj) {
-            assert.isNull(e);
-            assert.isDefined(obj);
+describe('Document', function(){
+    describe('#save()', function(){
+        it('An historical record should be created when a document is saved.', function(done){
+            var document = new TestModel({
+                    testString: uniqueId,
+                    testNumber: 42,
+                    testArray: ['test1', 'test2'],
+                    testBoolean: true,
+                    testObject: {
+                        testObjectElement: 'test message'
+                    }
+                });
 
-            obj.historical('details', function (e, details) {
-                assert.isNull(e);
-                assert.type(details, 'object');
-                assert.equal(1, details.length);
+            document.save(function (e, obj) {
+                assert.equal(e, null);
+                assert.notEqual(obj, null);
 
-                obj._id = undefined;
-                obj.__v = undefined;
+                obj.historical(function (e, details) {
+                    assert.equal(e, null);
+                    assert.notEqual(details, null);
 
-                assert.eql(obj.toObject(), details[0].diff);
+                    obj._id = undefined;
+                    obj.__v = undefined;
 
-                connection.close();
+                    assert.deepEqual(obj.toObject(), details[0].diff);
+                    done();
+                });
             });
         });
-    }
-};
+    });
+    describe('#remove()', function(){
+        it('An historical record should be null when a document is removed.', function(done){
+            TestModel.findOne({testString: uniqueId}, function(e, document){
+                assert.equal(e, null);
+
+                document.remove(function(e, obj){
+                    assert.equal(e, null);
+                    assert.notEqual(obj, null);
+
+                    obj.historical(function(e, details){
+                        assert.equal(e, null);
+                        assert.notEqual(obj, null);
+
+                        assert.equal(details.pop().diff, null);
+
+                        document.historicalRestore(new Date(), function(e, restored){
+                            assert.equal(restored, null);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
