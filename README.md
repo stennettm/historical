@@ -5,6 +5,8 @@ Historical
 A Mongoose plugin that archives document diffs and provides
 a method for restoring documents to any point in time.
 
+Requires the `_id` field to be present in your document schema.
+
 This package is currently under development and should be considered unstable.
 
 Installation
