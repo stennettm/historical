@@ -15,7 +15,7 @@ module.exports = function (schema, options) {
 
         models[model.constructor.modelName] = models[model.constructor.modelName] === undefined ?
             connection.model(name, new Schema({
-                document: { type: options.idType || ObjectId, index: true },
+                document: { type: model.constructor.schema.paths._id.options.type || ObjectId, index: true },
                 timestamp: {type: Date, default: Date.now, index: true},
                 diff: Schema.Types.Mixed
             })) : models[model.constructor.modelName];
