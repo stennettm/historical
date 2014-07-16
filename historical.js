@@ -263,7 +263,7 @@ module.exports = function (schema, options) {
             action = args[0];
         }
 
-        if (typeof args[1] == 'date') {
+        if (_.isDate(args[1])) {
             date = args[1];
         }
 
