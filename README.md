@@ -5,7 +5,7 @@ Historical
 A Mongoose plugin that archives document diffs and provides
 a method for restoring documents to any point in time.
 
-Requires the `_id` field to be present in your document schema.
+Your schema will require a primary key (typically `_id`).
 
 This package is currently under development and should be considered unstable.
 
@@ -17,11 +17,16 @@ Installation
 Usage
 -----
 
-Attach the plugin.
+Attach the plugin. Configuration options:
+
+`connection`: Specify the mongoose connection. Defaults to your schema's mongoose connection.
+`name`: Specify the collection name. Defaults to '*_historical'.
+`primaryKeyName`: Specify the primary key name. Defaults to '_id'.
+`primaryKeyType`: Specify the type of the primary key. Defaults to your schema's configuration.
 
 ```javascript
-//provide your desired mongoose connection and/or collection name
-var options = {connection: null, name: null};
+//provide your desired mongoose connection, collection name, and/or primary key configuration
+var options = {connection: null, name: null, primaryKeyName: null, primaryKeyType: null};
 mySchema.plugin(require('historical'), options);
 ```
 

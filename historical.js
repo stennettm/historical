@@ -2,21 +2,29 @@ var mongoose = require('mongoose'),
     _ = require('underscore'),
     Schema = mongoose.Schema,
     ObjectId = Schema.Types.ObjectId,
-    models = [];
+    models = {};
 
 _.mixin(require('underscore.deep'));
 
 module.exports = function (schema, options) {
     options = options || {};
+    var primaryKeyName;
 
     var getHistoricalModel = function (model) {
         var connection = options.connection || model.constructor.collection.conn,
-            name = options.name || model.constructor.modelName + 's_historical',
-            idType = options.idType || (model.constructor.schema.paths._id.options.type || ObjectId);
+            name = options.name || model.constructor.modelName + 's_historical';
+
+        primaryKeyName = options.primaryKeyName || '_id';
+
+        if(!model.constructor.schema.paths[primaryKeyName]){
+            throw new Error('Historical error: Missing primary key `'+primaryKeyName+'` in schema `'+name+'`.');
+        }
+
+        var primaryKeyType = (options.primaryKeyType || options.idType) || (model.constructor.schema.paths[primaryKeyName].options.type || ObjectId);
 
         models[model.constructor.modelName] = models[model.constructor.modelName] === undefined ?
             connection.model(name, new Schema({
-                document: { type: idType, index: true },
+                document: { type: primaryKeyType, index: true },
                 timestamp: {type: Date, default: Date.now, index: true},
                 diff: Schema.Types.Mixed
             })) : models[model.constructor.modelName];
@@ -63,7 +71,7 @@ module.exports = function (schema, options) {
         });
 
         var historical = new HistoricalModel({
-            document: me.id,
+            document: me[primaryKeyName],
             diff: diff
         });
         historical.save(next);
@@ -74,7 +82,7 @@ module.exports = function (schema, options) {
             HistoricalModel = getHistoricalModel(me);
 
         var historical = new HistoricalModel({
-            document: me.id,
+            document: me[primaryKeyName],
             diff: null
         });
         historical.save(next);
@@ -89,7 +97,7 @@ module.exports = function (schema, options) {
             return;
         }
         var historical = new HistoricalModel({
-            document: me.id,
+            document: me[primaryKeyName],
             diff: me.toObject()
         });
         historical.save(function (e) {
@@ -109,7 +117,7 @@ module.exports = function (schema, options) {
         var me = this,
             HistoricalModel = getHistoricalModel(me);
 
-        HistoricalModel.find({document: me.id}, function (e, objs) {
+        HistoricalModel.find({document: me[primaryKeyName]}, function (e, objs) {
             if (e) {
                 if (_.isFunction(callback)) {
                     callback(e);
@@ -145,7 +153,7 @@ module.exports = function (schema, options) {
             return;
         }
 
-        HistoricalModel.find({document: me.id, timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
+        HistoricalModel.find({document: me[primaryKeyName], timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
             if (e) {
                 if (_.isFunction(callback)) {
                     callback(e);
@@ -174,7 +182,7 @@ module.exports = function (schema, options) {
             }
 
             var newObj = new me.constructor(surrogate);
-            newObj.id = me.id;
+            newObj[primaryKeyName] = me[primaryKeyName];
             if (_.isFunction(callback)) {
                 callback(null, newObj);
             }
@@ -205,7 +213,7 @@ module.exports = function (schema, options) {
                 }
                 return;
             }
-            HistoricalModel.remove({document: me.id, timestamp: {$lte: date}}, function (e) {
+            HistoricalModel.remove({document: me[primaryKeyName], timestamp: {$lte: date}}, function (e) {
                 if (e) {
                     if (_.isFunction(callback)) {
                         callback(e);
@@ -213,7 +221,7 @@ module.exports = function (schema, options) {
                     return;
                 }
                 var trimmed = new HistoricalModel({
-                    document: me.id,
+                    document: me[primaryKeyName],
                     diff: obj.toObject(),
                     timestamp: date
                 });
@@ -241,7 +249,7 @@ module.exports = function (schema, options) {
             return;
         }
 
-        HistoricalModel.find({document: me.id, timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
+        HistoricalModel.find({document: me[primaryKeyName], timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
             if (e) {
                 callback(e);
                 return;
