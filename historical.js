@@ -20,7 +20,7 @@ module.exports = function (schema, options) {
             throw new Error('Historical error: Missing primary key `'+primaryKeyName+'` in schema `'+name+'`.');
         }
 
-        var primaryKeyType = (options.primaryKeyType || options.idType) || (model.constructor.schema.paths[primaryKeyName].options.type || ObjectId);
+        var primaryKeyType = (options.primaryKeyType || /* deprecated */ options.idType) || (model.constructor.schema.paths[primaryKeyName].options.type || ObjectId);
 
         models[model.constructor.modelName] = models[model.constructor.modelName] === undefined ?
             connection.model(name, new Schema({
