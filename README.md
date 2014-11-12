@@ -20,7 +20,7 @@ Usage
 Attach the plugin. Configuration options:
 
 - `connection`: Specify the mongoose connection. Defaults to your schema's mongoose connection.
-- `name`: Specify the collection name. Defaults to '`schemaName`_historical'.
+- `name`: Specify the collection name. Defaults to '`*`_historical'.
 - `primaryKeyName`: Specify the primary key name. Defaults to '_id'.
 - `primaryKeyType`: Specify the type of the primary key. Defaults to your schema's configuration.
 
