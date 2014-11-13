@@ -16,8 +16,8 @@ module.exports = function (schema, options) {
 
         primaryKeyName = options.primaryKeyName || '_id';
 
-        if(!model.constructor.schema.paths[primaryKeyName]){
-            throw new Error('Historical error: Missing primary key `'+primaryKeyName+'` in schema `'+name+'`.');
+        if (!model.constructor.schema.paths[primaryKeyName]) {
+            throw new Error('Historical error: Missing primary key `' + primaryKeyName + '` in schema `' + name + '`.');
         }
 
         var primaryKeyType = (options.primaryKeyType || /* deprecated */ options.idType) || (model.constructor.schema.paths[primaryKeyName].options.type || ObjectId);
@@ -92,9 +92,11 @@ module.exports = function (schema, options) {
         var me = this,
             HistoricalModel = getHistoricalModel(me);
 
+        callback = _.isFunction(callback) ? callback : function () {
+        };
+
         if (me.modifiedPaths().length) {
-            callback(new Error('Historical error: Attempted to snapshot an unsaved/modified document.'));
-            return;
+            return callback(new Error('Historical error: Attempted to snapshot an unsaved/modified document.'));
         }
         var historical = new HistoricalModel({
             document: me[primaryKeyName],
@@ -102,14 +104,9 @@ module.exports = function (schema, options) {
         });
         historical.save(function (e) {
             if (e) {
-                if (_.isFunction(callback)) {
-                    callback(e);
-                }
-                return;
+                return callback(e);
             }
-            if (_.isFunction(callback)) {
-                callback(null, me);
-            }
+            return callback(null, me);
         });
     };
 
@@ -117,26 +114,21 @@ module.exports = function (schema, options) {
         var me = this,
             HistoricalModel = getHistoricalModel(me);
 
+        callback = _.isFunction(callback) ? callback : function () {
+        };
+
         HistoricalModel.find({document: me[primaryKeyName]}, function (e, objs) {
             if (e) {
-                if (_.isFunction(callback)) {
-                    callback(e);
-                }
-                return;
+                return callback(e);
             }
             me.historicalSnapshot(function (e) {
                 if (e) {
-                    if (_.isFunction(callback)) {
-                        callback(e);
-                    }
-                    return;
+                    return callback(e);
                 }
                 objs.forEach(function (obj) {
                     obj.remove();
                 });
-                if (_.isFunction(callback)) {
-                    callback(null, me);
-                }
+                return callback(null, me);
             });
         });
     };
@@ -146,29 +138,23 @@ module.exports = function (schema, options) {
             HistoricalModel = getHistoricalModel(me),
             surrogate = {};
 
+        callback = _.isFunction(callback) ? callback : function () {
+        };
+
         if (!_.isDate(date) || date.getTime() > new Date().getTime()) {
-            if (_.isFunction(callback)) {
-                callback(new Error('Historical error: Invalid date.'));
-            }
-            return;
+            return callback(new Error('Historical error: Invalid date.'));
         }
 
         HistoricalModel.find({document: me[primaryKeyName], timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
             if (e) {
-                if (_.isFunction(callback)) {
-                    callback(e);
-                }
-                return;
+                return callback(e);
             }
             if (!objs) {
-                if (_.isFunction(callback)) {
-                    callback(null, null);
-                }
-                return;
+                return callback(null, null);
             }
 
             objs.forEach(function (obj) {
-                if(!obj.diff){
+                if (!obj.diff) {
                     surrogate = null;
                 }
                 else {
@@ -176,16 +162,13 @@ module.exports = function (schema, options) {
                 }
             });
 
-            if(!surrogate){
-                callback(null, null);
-                return;
+            if (!surrogate) {
+                return callback(null, null);
             }
 
             var newObj = new me.constructor(surrogate);
             newObj[primaryKeyName] = me[primaryKeyName];
-            if (_.isFunction(callback)) {
-                callback(null, newObj);
-            }
+            return callback(null, newObj);
         });
     };
 
@@ -193,32 +176,23 @@ module.exports = function (schema, options) {
         var me = this,
             HistoricalModel = getHistoricalModel(me);
 
+        callback = _.isFunction(callback) ? callback : function () {
+        };
+
         if (!_.isDate(date) || date.getTime() > new Date().getTime()) {
-            if (_.isFunction(callback)) {
-                callback(new Error('Historical error: Invalid date.'));
-            }
-            return;
+            return callback(new Error('Historical error: Invalid date.'));
         }
 
         me.historicalRestore(date, function (e, obj) {
             if (e) {
-                if (_.isFunction(callback)) {
-                    callback(e);
-                }
-                return;
+                return callback(e);
             }
             if (!obj) {
-                if (_.isFunction(callback)) {
-                    callback(null, me);
-                }
-                return;
+                return callback(null, me);
             }
             HistoricalModel.remove({document: me[primaryKeyName], timestamp: {$lte: date}}, function (e) {
                 if (e) {
-                    if (_.isFunction(callback)) {
-                        callback(e);
-                    }
-                    return;
+                    return callback(e);
                 }
                 var trimmed = new HistoricalModel({
                     document: me[primaryKeyName],
@@ -227,12 +201,9 @@ module.exports = function (schema, options) {
                 });
                 trimmed.save(function (e) {
                     if (e) {
-                        callback(e);
-                        return;
+                        return callback(e);
                     }
-                    if (_.isFunction(callback)) {
-                        callback(null, me);
-                    }
+                    return callback(null, me);
                 });
             });
         });
@@ -242,21 +213,18 @@ module.exports = function (schema, options) {
         var me = this,
             HistoricalModel = getHistoricalModel(me);
 
+        callback = _.isFunction(callback) ? callback : function () {
+        };
+
         if (!_.isDate(date) || date.getTime() > new Date().getTime()) {
-            if (_.isFunction(callback)) {
-                callback(new Error('Historical error: Invalid date.'));
-            }
-            return;
+            return callback(new Error('Historical error: Invalid date.'));
         }
 
         HistoricalModel.find({document: me[primaryKeyName], timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
             if (e) {
-                callback(e);
-                return;
+                return callback(e);
             }
-            if (_.isFunction(callback)) {
-                callback(null, objs);
-            }
+            return callback(null, objs);
         });
     };
 
@@ -268,7 +236,7 @@ module.exports = function (schema, options) {
             },
             args = Array.prototype.slice.call(arguments, 0, 3);
 
-        if (typeof args[0] == 'string') {
+        if (_.isString(args[0])) {
             action = args[0];
         }
 
@@ -276,7 +244,7 @@ module.exports = function (schema, options) {
             date = args[1];
         }
 
-        if (typeof args[args.length - 1] == 'function') {
+        if (_.isFunction(args[args.length - 1])) {
             callback = args[args.length - 1];
         }
 
