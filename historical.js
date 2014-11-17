@@ -1,10 +1,8 @@
 var mongoose = require('mongoose'),
-    _ = require('underscore'),
+    _ = require('lodash'),
     Schema = mongoose.Schema,
     ObjectId = Schema.Types.ObjectId,
     models = {};
-
-_.mixin(require('underscore.deep'));
 
 module.exports = function (schema, options) {
     options = options || {};
@@ -55,7 +53,7 @@ module.exports = function (schema, options) {
     schema.pre('save', function (next) {
         var me = this,
             HistoricalModel = getHistoricalModel(me),
-            modified = _.uniq(this.modifiedPaths()),
+            modified = _.uniq(me.modifiedPaths()),
             diff = {};
 
         modified.forEach(function (index) {
@@ -158,7 +156,7 @@ module.exports = function (schema, options) {
                     surrogate = null;
                 }
                 else {
-                    surrogate = _.deepExtend(surrogate, obj.diff);
+                    surrogate = _.merge(surrogate, obj.diff);
                 }
             });
 
@@ -166,9 +164,8 @@ module.exports = function (schema, options) {
                 return callback(null, null);
             }
 
-            var newObj = new me.constructor(surrogate);
-            newObj[primaryKeyName] = me[primaryKeyName];
-            return callback(null, newObj);
+            me.set(_.merge(me.toObject(), surrogate));
+            return callback(null, me);
         });
     };
 

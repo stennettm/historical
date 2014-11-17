@@ -8,8 +8,7 @@
     "main" : "historical.js",
     "version" : "0.1.15",
     "dependencies": {
-        "underscore": "1.6.x",
-        "underscore.deep": "0.2.x",
+        "lodash": "2.4.x",
         "mongoose": "3.8.x"
     },
     "devDependencies": {
