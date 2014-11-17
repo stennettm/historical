@@ -2,8 +2,7 @@
 Historical
 ==========
 
-A Mongoose plugin that archives document diffs and provides
-a method for restoring documents to any point in time.
+A Mongoose plugin that archives document diffs and manages document history.
 
 Historical requires a primary key (typically `_id`) to be present in your schema.
 
