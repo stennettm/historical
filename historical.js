@@ -164,9 +164,7 @@ module.exports = function (schema, options) {
                 return callback(null, null);
             }
 
-            me.set(_.merge(me.toObject(), surrogate, function(a, b){
-                return _.isArray(b) ? b : undefined;
-            }));
+            me.set(_.merge(me.toObject(), surrogate));
             return callback(null, me);
         });
     };
