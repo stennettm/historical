@@ -158,7 +158,14 @@ module.exports = function (schema, options) {
                 return callback(null, null);
             }
 
-            me.set(_.merge(me.toObject(), surrogate));
+            var meObj = {};
+            _.pairs(me.constructor.schema.paths).forEach(function(pair){
+                write(meObj, pair[0], null);
+            });
+            delete meObj[primaryKeyName];
+            delete meObj.__v;
+
+            me.set(_.merge(meObj, surrogate));
             return callback(null, me);
         });
     };
