@@ -6,7 +6,7 @@
     "author" : "Matthew Stennett <matt@stennett.com>",
     "repository" : {"type": "git", "url": "git://github.com/stennettm/historical.git"},
     "main" : "historical.js",
-    "version" : "0.1.18",
+    "version" : "0.1.19",
     "dependencies": {
         "lodash": "2.4.x",
         "mongoose": "3.8.x"
