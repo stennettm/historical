@@ -103,10 +103,7 @@ module.exports = function (schema, options) {
             diff: snapshot
         });
         historical.save(function (e) {
-            if (e) {
-                return callback(e);
-            }
-            return callback(null, me);
+            return e ? callback(e) : callback(null, me);
         });
     };
 
@@ -154,12 +151,7 @@ module.exports = function (schema, options) {
             }
 
             objs.forEach(function (obj) {
-                if (!obj.diff) {
-                    surrogate = null;
-                }
-                else {
-                    surrogate = _.merge(surrogate, obj.diff);
-                }
+                surrogate = obj.diff ? _.merge(surrogate, obj.diff) : null;
             });
 
             if (!surrogate) {
@@ -199,10 +191,7 @@ module.exports = function (schema, options) {
                     timestamp: date
                 });
                 trimmed.save(function (e) {
-                    if (e) {
-                        return callback(e);
-                    }
-                    return callback(null, me);
+                    return e ? callback(e) : callback(null, me);
                 });
             });
         });
@@ -220,10 +209,7 @@ module.exports = function (schema, options) {
         }
 
         HistoricalModel.find({document: me[primaryKeyName], timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
-            if (e) {
-                return callback(e);
-            }
-            return callback(null, objs);
+            return e ? callback(e) : callback(null, objs);
         });
     };
 
