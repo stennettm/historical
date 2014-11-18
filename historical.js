@@ -10,13 +10,12 @@ module.exports = function (schema, options) {
 
     var getHistoricalModel = function (model) {
         var connection = options.connection || model.constructor.collection.conn,
-            name = options.name || model.constructor.modelName + 's_historical';
+            name = options.name || model.constructor.modelName + 's_historical',
+            primaryKeyType = (options.primaryKeyType || /* deprecated */ options.idType) || (model.constructor.schema.paths[primaryKeyName].options.type || ObjectId);
 
         if (!model.constructor.schema.paths[primaryKeyName]) {
             throw new Error('Historical error: Missing primary key `' + primaryKeyName + '` in schema `' + name + '`.');
         }
-
-        var primaryKeyType = (options.primaryKeyType || /* deprecated */ options.idType) || (model.constructor.schema.paths[primaryKeyName].options.type || ObjectId);
 
         models[model.constructor.modelName] = models[model.constructor.modelName] === undefined ?
             connection.model(name, new Schema({
