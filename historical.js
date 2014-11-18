@@ -6,13 +6,11 @@ var mongoose = require('mongoose'),
 
 module.exports = function (schema, options) {
     options = options || {};
-    var primaryKeyName;
+    var primaryKeyName = options.primaryKeyName || '_id';
 
     var getHistoricalModel = function (model) {
         var connection = options.connection || model.constructor.collection.conn,
             name = options.name || model.constructor.modelName + 's_historical';
-
-        primaryKeyName = options.primaryKeyName || '_id';
 
         if (!model.constructor.schema.paths[primaryKeyName]) {
             throw new Error('Historical error: Missing primary key `' + primaryKeyName + '` in schema `' + name + '`.');
