@@ -96,9 +96,14 @@ module.exports = function (schema, options) {
         if (me.modifiedPaths().length) {
             return callback(new Error('Historical error: Attempted to snapshot an unsaved/modified document.'));
         }
+
+        var snapshot = me.toObject();
+        delete snapshot[primaryKeyName];
+        delete snapshot.__v;
+
         var historical = new HistoricalModel({
             document: me[primaryKeyName],
-            diff: me.toObject()
+            diff: snapshot
         });
         historical.save(function (e) {
             if (e) {
