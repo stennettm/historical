@@ -2,7 +2,7 @@
     "name" : "historical",
     "description" : "A Mongoose plugin that archives document diffs and manages document history.",
     "homepage" : "https://github.com/stennettm/historical",
-    "keywords" : ["mongoose", "history", "express"],
+    "keywords" : ["mongoose", "history", "document", "restore"],
     "author" : "Matthew Stennett <matt@stennett.com>",
     "repository" : {"type": "git", "url": "git://github.com/stennettm/historical.git"},
     "main" : "historical.js",
