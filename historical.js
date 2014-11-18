@@ -19,12 +19,12 @@ module.exports = function (schema, options) {
             throw new Error('Historical error: Missing primary key `' + primaryKeyName + '` in schema `' + name + '`.');
         }
 
-        models[model.constructor.modelName] = models[model.constructor.modelName] === undefined ?
+        models[model.constructor.modelName] = models[model.constructor.modelName] ||
             connection.model(name, new Schema({
                 document: { type: primaryKeyType, index: true },
                 timestamp: {type: Date, default: Date.now, index: true},
                 diff: Schema.Types.Mixed
-            })) : models[model.constructor.modelName];
+            }));
 
         return models[model.constructor.modelName];
     };
