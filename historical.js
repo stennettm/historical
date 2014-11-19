@@ -29,7 +29,7 @@ module.exports = function (schema, options) {
         return models[model.constructor.modelName];
     };
 
-    var arrayMerge =  function(a, b) {
+    var arrayMerge = function (a, b) {
         return _.isArray(b) ? b : undefined;
     };
 
@@ -165,7 +165,7 @@ module.exports = function (schema, options) {
             }
 
             var meObj = {};
-            _.pairs(me.constructor.schema.paths).forEach(function(pair){
+            _.pairs(me.constructor.schema.paths).forEach(function (pair) {
                 write(meObj, pair[0], null);
             });
             delete meObj[primaryKeyName];
