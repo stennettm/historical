@@ -29,6 +29,10 @@ module.exports = function (schema, options) {
         return models[model.constructor.modelName];
     };
 
+    var arrayMerge =  function(a, b) {
+        return _.isArray(b) ? b : undefined;
+    };
+
     var read = function (o, p) {
         for (var i = 0, a = p.split('.'), l = a.length; i < l; i++) {
             o = o[a[i]];
@@ -153,7 +157,7 @@ module.exports = function (schema, options) {
             }
 
             objs.forEach(function (obj) {
-                surrogate = obj.diff ? _.merge(surrogate, obj.diff) : null;
+                surrogate = obj.diff ? _.merge(surrogate, obj.diff, arrayMerge) : null;
             });
 
             if (!surrogate) {
@@ -167,7 +171,7 @@ module.exports = function (schema, options) {
             delete meObj[primaryKeyName];
             delete meObj.__v;
 
-            me.set(_.merge(meObj, surrogate));
+            me.set(_.merge(meObj, surrogate, arrayMerge));
             return callback(null, me);
         });
     };
