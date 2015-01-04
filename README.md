@@ -28,7 +28,7 @@ Attach the plugin. Configuration (all optional):
 var mongoose = require('mongoose'),
     options  = {
       mongoose: mongoose,
-      connection: mongoose.createConnection('mongodb://localhost'),
+      connection: mongoose.createConnection('mongodb://localhost/example'),
       name: null,
       primaryKeyName: null,
       primaryKeyType: null
