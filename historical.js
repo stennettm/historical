@@ -1,14 +1,14 @@
 "use strict";
 
-var mongoose = require('mongoose'),
-    _ = require('lodash'),
-    Schema = mongoose.Schema,
-    ObjectId = Schema.Types.ObjectId,
+var _      = require('lodash'),
     models = {};
 
 module.exports = function (schema, options) {
     options = options || {};
-    var primaryKeyName = options.primaryKeyName || '_id';
+    var mongoose = options.mongoose || require('mongoose'),
+        Schema = mongoose.Schema,
+        ObjectId = Schema.Types.ObjectId,
+        primaryKeyName = options.primaryKeyName || '_id';
 
     var getHistoricalModel = function (model) {
         var connection = options.connection || model.constructor.collection.conn,
@@ -20,11 +20,11 @@ module.exports = function (schema, options) {
         }
 
         models[model.constructor.modelName] = models[model.constructor.modelName] ||
-            connection.model(name, new Schema({
-                document: { type: primaryKeyType, index: true },
-                timestamp: {type: Date, default: Date.now, index: true},
-                diff: Schema.Types.Mixed
-            }));
+        connection.model(name, new Schema({
+            document: {type: primaryKeyType, index: true},
+            timestamp: {type: Date, default: Date.now, index: true},
+            diff: Schema.Types.Mixed
+        }));
 
         return models[model.constructor.modelName];
     };
@@ -61,7 +61,7 @@ module.exports = function (schema, options) {
 
         modified.forEach(function (index) {
             var value = read(me, index);
-            if (_.isObject(value) && !_.isArray(value)) {
+            if (_.isPlainObject(value)) {
                 return;
             }
             if (value === undefined) {
@@ -148,7 +148,10 @@ module.exports = function (schema, options) {
             return callback(new Error('Historical error: Invalid date.'));
         }
 
-        HistoricalModel.find({document: me[primaryKeyName], timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
+        HistoricalModel.find({
+            document: me[primaryKeyName],
+            timestamp: {$lte: date}
+        }, null, {sort: {timestamp: 1}}, function (e, objs) {
             if (e) {
                 return callback(e);
             }
@@ -221,7 +224,10 @@ module.exports = function (schema, options) {
             return callback(new Error('Historical error: Invalid date.'));
         }
 
-        HistoricalModel.find({document: me[primaryKeyName], timestamp: {$lte: date}}, null, {sort: {timestamp: 1}}, function (e, objs) {
+        HistoricalModel.find({
+            document: me[primaryKeyName],
+            timestamp: {$lte: date}
+        }, null, {sort: {timestamp: 1}}, function (e, objs) {
             return e ? callback(e) : callback(null, objs);
         });
     };

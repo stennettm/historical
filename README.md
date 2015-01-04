@@ -16,16 +16,23 @@ Installation
 Usage
 -----
 
-Attach the plugin. Configuration options:
+Attach the plugin. Configuration (all optional):
 
-- `connection`: Specify the mongoose connection. Defaults to your schema's mongoose connection.
-- `name`: Specify the collection name. Defaults to `*_historical`.
+- `mongoose`: Provide the mongoose module, required when using global plugins or a specific version.
+- `connection`: Specify the mongoose connection. Defaults to your schema's defined connection.
+- `name`: Specify the collection name. Defaults to `*_historicals`.
 - `primaryKeyName`: Specify the primary key name. Defaults to `_id`.
 - `primaryKeyType`: Specify the type of the primary key. Defaults to your schema's configuration.
 
 ```javascript
-//provide your desired mongoose connection, collection name, and/or primary key configuration
-var options = {connection: null, name: null, primaryKeyName: null, primaryKeyType: null};
+var mongoose = require('mongoose'),
+    options  = {
+      mongoose: mongoose,
+      connection: mongoose.createConnection('mongodb://localhost'),
+      name: null,
+      primaryKeyName: null,
+      primaryKeyType: null
+   };
 mySchema.plugin(require('historical'), options);
 ```
 
