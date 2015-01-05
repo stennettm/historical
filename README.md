@@ -39,7 +39,7 @@ ExampleSchema.plugin(require('historical'), {
 });
 ```
 
-Document #historicalDetails(Date date, Function callback)
+Document #historicalDetails()
 ---------------------------------------------------------
 
 List historical objects for my document up to a point in history.
@@ -51,7 +51,7 @@ myDocument.historicalDetails(new Date('2010-08-17T12:09:36'), function(e, objs){
 });
 ```
 
-Document #historicalRestore(Date date, Function callback)
+Document #historicalRestore()
 ---------------------------------------------------------
 
 Restore a document to a previous point in history.
@@ -65,7 +65,7 @@ myDocument.historicalRestore(new Date('2010-08-17T12:09:36'), function(e, obj){
 });
 ```
 
-Document #historicalTrim(Date date, Function callback)
+Document #historicalTrim()
 ------------------------------------------------------
 
 Trim up to a point in history.
@@ -78,7 +78,7 @@ myDocument.historicalTrim(new Date('2010-08-17T12:09:36'), function(e, obj){
 });
 ```
 
-Document #historicalSnapshot(Function callback)
+Document #historicalSnapshot()
 -----------------------------------------------
 
 Take a complete and current snapshot of my document and store it in history. Unmodified documents only.
@@ -90,7 +90,7 @@ myDocument.historicalSnapshot(function(e, obj){
 });
 ```
 
-Document #historicalClear(Function callback)
+Document #historicalClear()
 --------------------------------------------
 
 Clear all history for my document and take a snapshot. Unmodified documents only.
