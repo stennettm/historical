@@ -13,51 +13,51 @@ Installation
 
 `npm install historical`
 
-Usage
------
+Getting Started
+---------------
 
-Attach the plugin. Configuration (all optional):
+Attach the plugin to your schema with any of these optional configuration parameters:
 
-- `mongoose`: Provide the mongoose module, required when using global plugins or a specific version.
-- `connection`: Specify the mongoose connection. Defaults to your schema's defined connection.
-- `name`: Specify the collection name. Defaults to `*_historicals`.
-- `primaryKeyName`: Specify the primary key name. Defaults to `_id`.
-- `primaryKeyType`: Specify the type of the primary key. Defaults to your schema's configuration.
-
-```javascript
-var mongoose = require('mongoose'),
-    options  = {
-      mongoose: mongoose,
-      connection: mongoose.createConnection('mongodb://localhost/example'),
-      name: null,
-      primaryKeyName: null,
-      primaryKeyType: null
-   };
-mySchema.plugin(require('historical'), options);
-```
-
-List all historical objects for my document.
+- `mongoose`: Provide the mongoose module, required when using extensions or if you'd like to use a specific version. Defaults to the latest 3.8.x version of mongoose with no extensions.
+- `connection`: Provide a mongoose connection. Defaults to your schema's connection.
+- `name`: Provide a collection name. Defaults to `<collection>_historicals`.
+- `primaryKeyName`: Provide your schema's primary key name. Defaults to `_id`.
+- `primaryKeyType`: Provide your schema's primary key type. Defaults to your schema's primary key field configuration.
 
 ```javascript
-myDocument.historical(function(e, objs){
-   //the list of historical changes for my document
-   console.log(objs);
+var mongoose   = require('mongoose'),
+    ExampleSchema = new mongoose.Schema({
+        myField: String
+    });
+
+ExampleSchema.plugin(require('historical'), {
+    mongoose: mongoose,
+    connection: mongoose.createConnection('mongodb://localhost/example'),
+    name: null,
+    primaryKeyName: null,
+    primaryKeyType: null
 });
 ```
+
+Document #historicalDetails(Date date, Function callback)
+---------------------------------------------------------
 
 List historical objects for my document up to a point in history.
 
 ```javascript
-myDocument.historical('details', new Date('2010-08-17T12:09:36'), function(e, objs){
+myDocument.historicalDetails(new Date('2010-08-17T12:09:36'), function(e, objs){
    //the list of historical changes for my document
    console.log(objs);
 });
 ```
 
+Document #historicalRestore(Date date, Function callback)
+---------------------------------------------------------
+
 Restore a document to a previous point in history.
 
 ```javascript
-myDocument.historical('restore', new Date('2010-08-17T12:09:36'), function(e, obj){
+myDocument.historicalRestore(new Date('2010-08-17T12:09:36'), function(e, obj){
    //my document as it was in 2010
    //or null, if it either had not yet been created or was deleted before this time
    if(obj)
@@ -65,29 +65,38 @@ myDocument.historical('restore', new Date('2010-08-17T12:09:36'), function(e, ob
 });
 ```
 
+Document #historicalTrim(Date date, Function callback)
+------------------------------------------------------
+
 Trim up to a point in history.
 
 ```javascript
-myDocument.historical('trim', new Date('2010-08-17T12:09:36'), function(e, obj){
+myDocument.historicalTrim(new Date('2010-08-17T12:09:36'), function(e, obj){
    //any history before this time has been flattened into one historical document
    //my document as it was provided
    console.log(obj);
 });
 ```
 
+Document #historicalSnapshot(Function callback)
+-----------------------------------------------
+
 Take a complete and current snapshot of my document and store it in history. Unmodified documents only.
 
 ```javascript
-myDocument.historical('snapshot', function(e, obj){
+myDocument.historicalSnapshot(function(e, obj){
    //my document as it was provided
    console.log(obj);
 });
 ```
 
+Document #historicalClear(Function callback)
+--------------------------------------------
+
 Clear all history for my document and take a snapshot. Unmodified documents only.
 
 ```javascript
-myDocument.historical('clear', function(e, obj){
+myDocument.historicalClear(function(e, obj){
    //my document as it was provided
    console.log(obj);
 });
