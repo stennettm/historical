@@ -25,10 +25,10 @@ Attach the plugin to your schema with any of these optional configuration parame
 - `primaryKeyType`: Provide your schema's primary key type. Defaults to your schema's primary key field configuration.
 
 ```javascript
-var mongoose   = require('mongoose'),
-    ExampleSchema = new mongoose.Schema({
-        myField: String
-    });
+var mongoose  = require('mongoose'),
+ExampleSchema = new mongoose.Schema({
+    myField: String
+});
 
 ExampleSchema.plugin(require('historical'), {
     mongoose: mongoose,
