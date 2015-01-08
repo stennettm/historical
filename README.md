@@ -13,6 +13,8 @@ Installation
 
 `npm install historical`
 
+Latest version: 0.1.22
+
 Getting Started
 ---------------
 
