@@ -6,20 +6,15 @@
     "author" : "Matthew R. Stennett <matt@stennett.com>",
     "repository" : {"type": "git", "url": "git://github.com/stennettm/historical.git"},
     "main" : "historical.js",
-    "version" : "0.1.22",
+    "version" : "0.1.23",
     "dependencies": {
-        "lodash": "2.4.x",
-        "mongoose": "3.8.x"
+        "lodash": "^3.10.1",
+        "mongoose": "^4.2.4"
     },
     "devDependencies": {
         "mocha": "1.20.x"
     },
-    "licenses": [
-        {
-            "type": "MIT",
-            "url": "https://github.com/stennettm/historical/blob/master/LICENSE"
-        }
-    ],
+    "license": "MIT",
     "files" : ["historical.js", "LICENSE"],
     "scripts": {
         "test": "mocha"

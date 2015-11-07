@@ -11,14 +11,14 @@ This package is currently under development and should be considered unstable.
 Installation
 ------------
 
-`npm install historical@0.1.22`
+`npm install historical@0.1.23`
 
 Getting Started
 ---------------
 
 Attach the plugin to your schema with any of these optional configuration parameters:
 
-- `mongoose`: Provide the mongoose module, required when using extensions or if you'd like to use a specific version. Defaults to the latest 3.8.x version of mongoose with no extensions.
+- `mongoose`: Provide the mongoose module, required when using extensions or if you'd like to use a specific version. Defaults to the latest 4.x version of mongoose with no extensions.
 - `connection`: Provide a mongoose connection. Defaults to your schema's connection.
 - `name`: Provide a collection name. Defaults to `<collection>_historicals`.
 - `primaryKeyName`: Provide your schema's primary key name. Defaults to `_id`.
