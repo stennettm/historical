@@ -11,7 +11,7 @@ This package is currently under development and should be considered unstable.
 Installation
 ------------
 
-`npm install historical@^0.2.0`
+`npm install historical@^1.0.0`
 
 Getting Started
 ---------------
