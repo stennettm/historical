@@ -1,22 +1,37 @@
 {
-    "name" : "historical",
-    "description" : "A Mongoose plugin that archives document diffs and manages document history.",
-    "homepage" : "https://github.com/stennettm/historical",
-    "keywords" : ["mongoose", "history", "document", "restore", "revert", "recover"],
-    "author" : "Matthew R. Stennett <matt@stennett.com>",
-    "repository" : {"type": "git", "url": "git://github.com/stennettm/historical.git"},
-    "main" : "historical.js",
-    "version" : "0.1.23",
-    "dependencies": {
-        "lodash": "^3.10.1",
-        "mongoose": "^4.2.4"
-    },
-    "devDependencies": {
-        "mocha": "1.20.x"
-    },
-    "license": "MIT",
-    "files" : ["historical.js", "LICENSE"],
-    "scripts": {
-        "test": "mocha"
-    }
+  "name": "historical",
+  "description": "A Mongoose plugin that archives document diffs and manages document history.",
+  "homepage": "https://github.com/stennettm/historical",
+  "keywords": [
+    "mongoose",
+    "history",
+    "document",
+    "restore",
+    "revert",
+    "recover"
+  ],
+  "author": "Matthew R. Stennett <matt@stennett.com>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/stennettm/historical.git"
+  },
+  "main": "historical.js",
+  "version": "0.2.0",
+  "dependencies": {
+    "lodash": "^3.10.1"
+  },
+  "peerDependencies": {
+    "mongoose": "^4.2.4"
+  },
+  "devDependencies": {
+    "mocha": "1.20.x"
+  },
+  "license": "MIT",
+  "files": [
+    "historical.js",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "mocha"
+  }
 }
