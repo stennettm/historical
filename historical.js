@@ -5,7 +5,7 @@ var _      = require('lodash'),
 
 module.exports = function (schema, options) {
     options = options || {};
-    var mongoose       = options.mongoose || require('mongoose'),
+    var mongoose       = options.mongoose /* DEPRECATED */ || require('mongoose'),
         Schema         = mongoose.Schema,
         ObjectId       = Schema.Types.ObjectId,
         primaryKeyName = options.primaryKeyName || '_id';
@@ -13,7 +13,7 @@ module.exports = function (schema, options) {
     var getHistoricalModel = function (model) {
         var connection     = options.connection || model.constructor.collection.conn,
             name           = options.name || model.constructor.modelName + 's_historical',
-            primaryKeyType = (options.primaryKeyType || /* deprecated */ options.idType) || (model.constructor.schema.paths[primaryKeyName].options.type || ObjectId);
+            primaryKeyType = (options.primaryKeyType || /* DEPRECATED */ options.idType) || (model.constructor.schema.paths[primaryKeyName].options.type || ObjectId);
 
         if (!model.constructor.schema.paths[primaryKeyName]) {
             throw new Error('Historical error: Missing primary key `' + primaryKeyName + '` in schema `' + name + '`.');
