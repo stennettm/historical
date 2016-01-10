@@ -18,11 +18,11 @@ Getting Started
 
 Attach the plugin to your schema with any of these optional configuration parameters:
 
-- `mongoose`: Provide the mongoose module, required when using extensions or if you'd like to use a specific version. Defaults to the latest 4.x version of mongoose with no extensions.
-- `connection`: Provide a mongoose connection. Defaults to your schema's connection.
 - `name`: Provide a collection name. Defaults to `<collection>_historicals`.
+- `connection`: Provide a mongoose connection for the historical collection. Defaults to your schema's connection.
 - `primaryKeyName`: Provide your schema's primary key name. Defaults to `_id`.
 - `primaryKeyType`: Provide your schema's primary key type. Defaults to your schema's primary key field configuration.
+- `mongoose`: DEPRECATED. Mongoose is now a peer dependency. Providing the mongoose package when using global plugins such as `mongoose-q` or similar is no longer required.
 
 ```javascript
 var mongoose  = require('mongoose'),
@@ -31,7 +31,6 @@ ExampleSchema = new mongoose.Schema({
 });
 
 ExampleSchema.plugin(require('historical'), {
-    mongoose: mongoose,
     connection: mongoose.createConnection('mongodb://localhost/example'),
     name: null,
     primaryKeyName: null,

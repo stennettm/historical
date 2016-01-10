@@ -16,7 +16,7 @@
     "url": "git://github.com/stennettm/historical.git"
   },
   "main": "historical.js",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "dependencies": {
     "lodash": "^3.10.1"
   },
