@@ -22,7 +22,7 @@ Attach the plugin to your schema with any of these optional configuration parame
 - `connection`: Provide a mongoose connection for the historical collection. Defaults to your schema's connection.
 - `primaryKeyName`: Provide your schema's primary key name. Defaults to `_id`.
 - `primaryKeyType`: Provide your schema's primary key type. Defaults to your schema's primary key field configuration.
-- `mongoose`: DEPRECATED. Mongoose is now a peer dependency. Providing the mongoose package when using global plugins such as `mongoose-q` or similar is no longer required.
+- `mongoose`: DEPRECATED. Mongoose is now a peer dependency.
 
 ```javascript
 var mongoose  = require('mongoose'),
