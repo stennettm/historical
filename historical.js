@@ -5,14 +5,14 @@ var _      = require('lodash'),
 
 module.exports = function (schema, options) {
     options = options || {};
-    var mongoose = options.mongoose || require('mongoose'),
-        Schema = mongoose.Schema,
-        ObjectId = Schema.Types.ObjectId,
+    var mongoose       = options.mongoose || require('mongoose'),
+        Schema         = mongoose.Schema,
+        ObjectId       = Schema.Types.ObjectId,
         primaryKeyName = options.primaryKeyName || '_id';
 
     var getHistoricalModel = function (model) {
-        var connection = options.connection || model.constructor.collection.conn,
-            name = options.name || model.constructor.modelName + 's_historical',
+        var connection     = options.connection || model.constructor.collection.conn,
+            name           = options.name || model.constructor.modelName + 's_historical',
             primaryKeyType = (options.primaryKeyType || /* deprecated */ options.idType) || (model.constructor.schema.paths[primaryKeyName].options.type || ObjectId);
 
         if (!model.constructor.schema.paths[primaryKeyName]) {
@@ -20,11 +20,11 @@ module.exports = function (schema, options) {
         }
 
         models[model.constructor.modelName] = models[model.constructor.modelName] ||
-        connection.model(name, new Schema({
-            document: {type: primaryKeyType, index: true},
-            timestamp: {type: Date, default: Date.now, index: true},
-            diff: Schema.Types.Mixed
-        }));
+            connection.model(name, new Schema({
+                document: {type: primaryKeyType, index: true},
+                timestamp: {type: Date, default: Date.now, index: true},
+                diff: Schema.Types.Mixed
+            }));
 
         return models[model.constructor.modelName];
     };
@@ -54,10 +54,10 @@ module.exports = function (schema, options) {
     };
 
     schema.pre('save', function (next) {
-        var me = this,
+        var me              = this,
             HistoricalModel = getHistoricalModel(me),
-            modified = _.uniq(me.modifiedPaths()),
-            diff = {};
+            modified        = _.uniq(me.modifiedPaths()),
+            diff            = {};
 
         modified.forEach(function (index) {
             var value = read(me, index);
@@ -79,7 +79,7 @@ module.exports = function (schema, options) {
     });
 
     schema.pre('remove', function (next) {
-        var me = this,
+        var me              = this,
             HistoricalModel = getHistoricalModel(me);
 
         var historical = new HistoricalModel({
@@ -90,7 +90,7 @@ module.exports = function (schema, options) {
     });
 
     schema.methods.historicalSnapshot = function (callback) {
-        var me = this,
+        var me              = this,
             HistoricalModel = getHistoricalModel(me);
 
         callback = _.isFunction(callback) ? callback : function () {
@@ -114,7 +114,7 @@ module.exports = function (schema, options) {
     };
 
     schema.methods.historicalClear = function (callback) {
-        var me = this,
+        var me              = this,
             HistoricalModel = getHistoricalModel(me);
 
         callback = _.isFunction(callback) ? callback : function () {
@@ -137,9 +137,9 @@ module.exports = function (schema, options) {
     };
 
     schema.methods.historicalRestore = function (date, callback) {
-        var me = this,
+        var me              = this,
             HistoricalModel = getHistoricalModel(me),
-            surrogate = {};
+            surrogate       = {};
 
         callback = _.isFunction(callback) ? callback : function () {
         };
@@ -180,7 +180,7 @@ module.exports = function (schema, options) {
     };
 
     schema.methods.historicalTrim = function (date, callback) {
-        var me = this,
+        var me              = this,
             HistoricalModel = getHistoricalModel(me);
 
         callback = _.isFunction(callback) ? callback : function () {
@@ -214,7 +214,7 @@ module.exports = function (schema, options) {
     };
 
     schema.methods.historicalDetails = function (date, callback) {
-        var me = this,
+        var me              = this,
             HistoricalModel = getHistoricalModel(me);
 
         callback = _.isFunction(callback) ? callback : function () {
@@ -233,12 +233,12 @@ module.exports = function (schema, options) {
     };
 
     schema.methods.historical = function () {
-        var me = this,
-            action = null,
-            date = new Date(),
+        var me       = this,
+            action   = null,
+            date     = new Date(),
             callback = function () {
             },
-            args = Array.prototype.slice.call(arguments, 0, 3);
+            args     = Array.prototype.slice.call(arguments, 0, 3);
 
         if (_.isString(args[0])) {
             action = args[0];
