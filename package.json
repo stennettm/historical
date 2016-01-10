@@ -21,7 +21,7 @@
     "lodash": "^3.10.1"
   },
   "peerDependencies": {
-    "mongoose": "^4.2.4"
+    "mongoose": "^4.3.5"
   },
   "license": "MIT",
   "files": [
