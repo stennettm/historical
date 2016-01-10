@@ -38,7 +38,7 @@ ExampleSchema.plugin(require('historical'), {
 Document #historicalDetails()
 ---------------------------------------------------------
 
-List historical objects for my document up to a point in history.
+List historical documents up to the given date for a document.
 
 ```javascript
 myDocument.historicalDetails(new Date('2010-08-17T12:09:36'), function(e, objs){
@@ -50,21 +50,23 @@ myDocument.historicalDetails(new Date('2010-08-17T12:09:36'), function(e, objs){
 Document #historicalRestore()
 ---------------------------------------------------------
 
-Restore a document to a previous point in history.
+Returns a document as it was at the given date.
 
 ```javascript
 myDocument.historicalRestore(new Date('2010-08-17T12:09:36'), function(e, obj){
    //my document as it was in 2010
    //or null, if it either had not yet been created or was deleted before this time
-   if(obj)
+   if(obj) {
       obj.save();
+   }
 });
 ```
 
 Document #historicalTrim()
 ------------------------------------------------------
 
-Trim up to a point in history.
+Creates a new historical document by flattening history up to the given date, and deletes the touched historical documents.
+Useful for pruning or establishing a maximum history retention period.
 
 ```javascript
 myDocument.historicalTrim(new Date('2010-08-17T12:09:36'), function(e, obj){
@@ -77,7 +79,8 @@ myDocument.historicalTrim(new Date('2010-08-17T12:09:36'), function(e, obj){
 Document #historicalSnapshot()
 -----------------------------------------------
 
-Take a complete and current snapshot of my document and store it in history. Unmodified documents only.
+Take a complete and current snapshot of my document and store it in history.
+Unmodified documents only.
 
 ```javascript
 myDocument.historicalSnapshot(function(e, obj){
@@ -89,7 +92,8 @@ myDocument.historicalSnapshot(function(e, obj){
 Document #historicalClear()
 --------------------------------------------
 
-Clear all history for my document and take a snapshot. Unmodified documents only.
+Clear all history for my document and take a snapshot.
+Unmodified documents only.
 
 ```javascript
 myDocument.historicalClear(function(e, obj){
