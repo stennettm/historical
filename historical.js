@@ -4,7 +4,7 @@ var _      = require('lodash'),
     models = {};
 
 module.exports = function (schema, options) {
-    options = options || {};
+    options            = options || {};
     var mongoose       = options.mongoose /* DEPRECATED */ || require('mongoose'),
         Schema         = mongoose.Schema,
         ObjectId       = Schema.Types.ObjectId,
@@ -47,7 +47,7 @@ module.exports = function (schema, options) {
                 o = o[n];
             } else {
                 o[n] = {};
-                o = o[n];
+                o    = o[n];
             }
         }
         o[a[a.length - 1]] = v;
@@ -57,19 +57,21 @@ module.exports = function (schema, options) {
         var me              = this,
             HistoricalModel = getHistoricalModel(me),
             modified        = _.uniq(me.modifiedPaths()),
-            diff            = {};
+            diff            = this.isNew ? me.toObject() : {};
 
-        modified.forEach(function (index) {
-            var value = read(me, index);
-            if (_.isPlainObject(value)) {
-                return;
-            }
-            if (value === undefined) {
-                write(diff, index, null);
-                return;
-            }
-            write(diff, index, value);
-        });
+        if (!this.isNew) {
+            modified.forEach(function (index) {
+                var value = read(me, index);
+                if (_.isPlainObject(value)) {
+                    return;
+                }
+                if (value === undefined) {
+                    write(diff, index, null);
+                    return;
+                }
+                write(diff, index, value);
+            });
+        }
 
         var historical = new HistoricalModel({
             document: me[primaryKeyName],

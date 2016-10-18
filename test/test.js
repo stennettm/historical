@@ -2,7 +2,10 @@ var assert = require("assert"),
     _ = require('lodash'),
     mongoose = require('mongoose'),
     TestSchema = new mongoose.Schema({
-        testString: String,
+        testString: {
+            type: String,
+            default: 'My default value'
+        },
         testNumber: Number,
         testArray: [String],
         testBoolean: Boolean,
@@ -18,7 +21,6 @@ var connection = mongoose.createConnection('mongodb://localhost/historical_test'
 describe('Document', function(){
 
     var document = new TestModel({
-        testString: 'test',
         testNumber: 42,
         testArray: ['test1', 'test2'],
         testObject: {
@@ -41,6 +43,7 @@ describe('Document', function(){
                     var diff = _.merge(details.pop().diff, {_id: obj._id, __v: obj.__v});
 
                     assert.deepEqual(obj.toObject(), diff);
+                    assert.equal(obj.testString, 'My default value');
 
                     done();
                 });
@@ -81,6 +84,7 @@ describe('Document', function(){
 
                     obj.historicalRestore(time, function(e, obj){
                         assert.equal(obj.testObject.testObjectElement, previousValue);
+                        assert.equal(obj.testString, 'My default value');
 
                         obj.save(function(e, obj){
                             document = obj;
