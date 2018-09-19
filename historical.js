@@ -8,6 +8,7 @@ module.exports = function (schema, options) {
     var mongoose       = options.mongoose /* DEPRECATED */ || require('mongoose'),
         Schema         = mongoose.Schema,
         ObjectId       = Schema.Types.ObjectId,
+        ignoredFields  = options.ignore || [],
         primaryKeyName = options.primaryKeyName || '_id';
 
     var getHistoricalModel = function (model) {
@@ -19,12 +20,33 @@ module.exports = function (schema, options) {
             throw new Error('Historical error: Missing primary key `' + primaryKeyName + '` in schema `' + name + '`.');
         }
 
-        models[model.constructor.modelName] = models[model.constructor.modelName] ||
-            connection.model(name, new Schema({
+        var createHistoricalSchema = function() {
+            var schema = new Schema({
                 document: {type: primaryKeyType, index: true},
                 timestamp: {type: Date, default: Date.now, index: true},
                 diff: Schema.Types.Mixed
-            }));
+            });
+            
+            schema.pre('save', function(next) {
+                var diff = this.diff;
+                
+                if(_.isArray(ignoredFields)) {
+                    ignoredFields.forEach(function(field){
+                        if(diff.hasOwnproperty(field)) {
+                            delete diff[field];
+                        }
+                    });
+                }
+                
+                this.diff = diff;
+                next();
+            });
+            
+            return schema;
+        };
+        
+        models[model.constructor.modelName] = models[model.constructor.modelName] ||
+            connection.model(name, createHistoricalSchema());
 
         return models[model.constructor.modelName];
     };
