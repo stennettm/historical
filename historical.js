@@ -79,11 +79,11 @@ module.exports = function (schema, options) {
         var me              = this,
             HistoricalModel = getHistoricalModel(me),
             modified        = _.uniq(me.modifiedPaths()),
-            diff            = this.isNew ? me.toObject() : {};
+            diff            = this.isNew ? me.toObject({virtuals: false}) : {};
 
         if (!this.isNew) {
             modified.forEach(function (index) {
-                var value = read(me, index);
+                var value = read(me.toObject({virtuals: false}), index);
                 if (_.isPlainObject(value)) {
                     return;
                 }
