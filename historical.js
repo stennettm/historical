@@ -192,7 +192,7 @@ module.exports = function (schema, options) {
             }
 
             var meObj = {};
-            _.pairs(me.constructor.schema.paths).forEach(function (pair) {
+            _.toPairs(me.constructor.schema.paths).forEach(function (pair) {
                 write(meObj, pair[0], null);
             });
             delete meObj[primaryKeyName];
