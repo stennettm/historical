@@ -11,9 +11,10 @@ var assert = require("assert"),
         testBoolean: Boolean,
         testObject: {
             testObjectElement: String
-        }
+        },
+        ignoredField: String
     });
-TestSchema.plugin(require('../historical.js'));
+TestSchema.plugin(require('../historical.js'), {ignore: ['ignoredField']});
 
 var connection = mongoose.createConnection('mongodb://localhost/historical_test'),
     TestModel = connection.model('test', TestSchema);
@@ -25,7 +26,8 @@ describe('Document', function(){
         testArray: ['test1', 'test2'],
         testObject: {
             testObjectElement: 'test message'
-        }
+        },
+        ignoredField: 'This field is ignored'
     });
 
     describe('#save()', function(){
@@ -41,10 +43,15 @@ describe('Document', function(){
                     assert.notEqual(details, null);
 
                     var diff = _.merge(details.pop().diff, {_id: obj._id, __v: obj.__v});
-
-                    assert.deepEqual(obj.toObject(), diff);
+                    
+                    assert.strictEqual(diff.ignoredField, undefined);
+                    
+                    var withoutIgnored = obj.toObject();
+                    delete withoutIgnored['ignoredField'];
+                    
+                    assert.deepEqual(withoutIgnored, diff);
                     assert.equal(obj.testString, 'My default value');
-
+                    
                     done();
                 });
             });
