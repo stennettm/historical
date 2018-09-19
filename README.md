@@ -20,12 +20,14 @@ Attach the plugin to your schema with any of these optional configuration parame
 - `connection`: Provide a mongoose connection for the historical collection. Defaults to your schema's connection.
 - `primaryKeyName`: Provide your schema's primary key name. Defaults to `_id`.
 - `primaryKeyType`: Provide your schema's primary key type. Defaults to your schema's primary key field configuration.
-- `ignore`: An array of field names to ignore.
+- `ignore`: An array of field names to ignore. Fields included in this list will not be stored in history.
 
 ```javascript
 var mongoose  = require('mongoose'),
 ExampleSchema = new mongoose.Schema({
-    myField: String
+    myField: String,
+    ignoredField: String,
+    anotherIgnoredField: String
 });
 
 ExampleSchema.plugin(require('historical'), {
