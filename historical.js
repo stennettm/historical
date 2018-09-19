@@ -32,7 +32,7 @@ module.exports = function (schema, options) {
                 
                 if(_.isArray(ignoredFields)) {
                     ignoredFields.forEach(function(field){
-                        if(diff.hasOwnproperty(field)) {
+                        if(_.has(diff, field)) {
                             delete diff[field];
                         }
                     });
