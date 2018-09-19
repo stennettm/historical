@@ -111,7 +111,10 @@ describe('Document', function(){
 
                     var diff = _.merge(details.pop().diff, {_id: obj._id, __v: obj.__v});
 
-                    assert.deepEqual(obj.toObject(), diff);
+                    var withoutIgnored = obj.toObject();
+                    delete withoutIgnored['ignoredField'];
+                    
+                    assert.deepEqual(withoutIgnored, diff);
 
                     done();
 
