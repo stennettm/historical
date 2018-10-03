@@ -102,6 +102,36 @@ module.exports = function (schema, options) {
         historical.save(next);
     });
 
+    schema.pre('findOneAndUpdate', function (next) {
+        schema.findOne(this.getQuery()).exec(function(err, doc) {
+            var me              = doc,
+                HistoricalModel = getHistoricalModel(me),
+                modified        = _.uniq(me.modifiedPaths()),
+                diff            = doc.isNew ? me.toObject({virtuals: false}) : {};
+
+            if (!doc.isNew) {
+                modified.forEach(function (index) {
+                    var value = read(me.toObject({virtuals: false}), index);
+                    if (_.isPlainObject(value)) {
+                        return;
+                    }
+                    if (value === undefined) {
+                        write(diff, index, null);
+                        return;
+                    }
+                    write(diff, index, value);
+                });
+            }
+
+            var historical = new HistoricalModel({
+                document: me[primaryKeyName],
+                diff: diff
+            });
+            
+            historical.save(next);
+        });
+    });
+
     schema.pre('remove', function (next) {
         var me              = this,
             HistoricalModel = getHistoricalModel(me);
