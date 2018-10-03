@@ -75,6 +75,31 @@ describe('Document', function(){
                 });
             });
         });
+
+        it('An historical record should be created when a document is modified.', function(done){
+            var update = {
+                $set: {
+                    testObject: {
+                        testObjectElement: 'this is a shift in concsiousness'
+                    }
+                }
+            }
+            TestModel.findOneAndUpdate({testObject:{testObjectElement: 'this is a test string'}}, update, function (e, obj) {
+                assert.equal(e, null);
+                assert.notEqual(obj, null);
+
+                document = obj;
+
+                obj.historical(function (e, details) {
+                    assert.equal(e, null);
+                    assert.notEqual(details, null);
+
+                    assert.deepEqual(details.pop().diff, {testObject:{testObjectElement: 'this is a shift in concsiousness'}});
+
+                    done();
+                });
+            });
+        });
     });
 
     describe('#historicalRestore()', function(){
