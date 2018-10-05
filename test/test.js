@@ -84,7 +84,14 @@ describe('Document', function(){
                     }
                 }
             }
-            TestModel.findOneAndUpdate({testObject:{testObjectElement: 'this is a test string'}}, update, function (e, obj) {
+
+            var query = {
+                testObject: {
+                    testObjectElement: 'this is a test string'
+                }
+            }
+
+            TestModel.findOneAndUpdate(query, update, function (e, obj) {
                 assert.equal(e, null);
                 assert.notEqual(obj, null);
 

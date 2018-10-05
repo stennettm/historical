@@ -102,8 +102,9 @@ module.exports = function (schema, options) {
         historical.save(next);
     });
 
+    var model = mongoose.model('model', schema);
     schema.pre('findOneAndUpdate', function (next) {
-        schema.findOne(this.getQuery()).exec(function(err, doc) {
+        model.findOne(this.getQuery()).exec().then(function(err, doc) {
             var me              = doc,
                 HistoricalModel = getHistoricalModel(me),
                 modified        = _.uniq(me.modifiedPaths()),
