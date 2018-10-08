@@ -102,9 +102,9 @@ module.exports = function (schema, options) {
         historical.save(next);
     });
 
-    var model = mongoose.model('model', schema);
+
     schema.pre('findOneAndUpdate', function (next) {
-        model.findOne(this.getQuery()).exec().then(function(err, doc) {
+        this.model.findOne(this.getQuery()).exec().then(function(doc) {
             var me              = doc,
                 HistoricalModel = getHistoricalModel(me),
                 modified        = _.uniq(me.modifiedPaths()),
@@ -128,8 +128,10 @@ module.exports = function (schema, options) {
                 document: me[primaryKeyName],
                 diff: diff
             });
-            
+
             historical.save(next);
+        }).catch((err) => {
+            console.error(`ERROR: ${err}`);
         });
     });
 
