@@ -104,11 +104,12 @@ module.exports = function (schema, options) {
 
 
     schema.pre('findOneAndUpdate', function (next) {
-        this.model.findOne(this.getQuery()).exec().then(function(doc) {
+        var query = this.getQuery();
+        this.model.findOne(query).exec().then(function(doc) {
             var me              = doc,
                 HistoricalModel = getHistoricalModel(me),
                 modified        = _.uniq(me.modifiedPaths()),
-                diff            = doc.isNew ? me.toObject({virtuals: false}) : {};
+                diff            = doc.isNew ? me.toObject({virtuals: false}) : query;
 
             if (!doc.isNew) {
                 modified.forEach(function (index) {
