@@ -131,9 +131,17 @@ module.exports = function (schema, options) {
             });
 
             historical.save(next);
-        }).catch((err) => {
-            console.error(`ERROR: ${err}`);
+        }).catch(function (err) {
+            console.error('ERROR: ' + err);
         });
+    });
+
+    schema.pre('update', function (next) {
+        next();
+    });
+
+    schema.pre('findOneAndRemove', function (next) {
+        next();
     });
 
     schema.pre('remove', function (next) {
