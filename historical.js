@@ -77,12 +77,17 @@ module.exports = function (schema, options) {
 
     // from https://stackoverflow.com/questions/10827108/mongoose-check-if-object-is-mongoose-object
     // by Lukasz Czerwinski
-    //
     var checkMongooseObject = function (v) {
         if (v === null) {
             return false;
         }
         return _.get(v, 'constructor.base') instanceof mongoose.Mongoose;
+    }
+
+    // from https://stackoverflow.com/questions/646628/how-to-check-if-a-string-startswith-another-string
+    // by momo
+    var startsWith = function (str, word) {
+        return str.lastIndexOf(word, 0) === 0;
     }
 
     //CODE BETWEEN THESE COMMENT LINES WAS ADAPTED FROM THE MONGOOSE CODEBASE
@@ -124,7 +129,7 @@ module.exports = function (schema, options) {
         var withoutDollarKeys = {};
         for (var i = 0; i < keys.length; ++i) {
             var key = keys[i];
-            if (key.startsWith('$')) {
+            if (startsWith(key, '$')) {
                 _getPaths(update[key], '', res); 
                 continue;
             }
