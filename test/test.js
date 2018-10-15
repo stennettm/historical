@@ -159,45 +159,46 @@ describe('Document', function(){
         });
 
         it('An historical record should be created when a document is saved.', function(done){
-            sub_document.save(function (e, obj) {
-                assert.equal(e, null);
-                assert.notEqual(obj, null);
-
-                sub_document = obj;
-
-                obj.historical(function (e, details) {
+            TestModel.deleteMany({}, function(){
+                sub_document.save(function (e, obj) {
                     assert.equal(e, null);
-                    assert.notEqual(details, null);
+                    assert.notEqual(obj, null);
 
-                    var diff = _.merge(details.pop().diff, {_id: obj._id, __v: obj.__v});
+                    sub_document = obj;
 
-                    assert.strictEqual(diff.ignoredField, undefined);
-                    
-                    var withoutIgnored = obj.toObject();
-                    delete withoutIgnored['ignoredField'];
-                    
-                    assert.deepEqual(withoutIgnored, diff);
-                    assert.equal(obj.testString, 'My default value');
-                    
-                    done();
+                    obj.historical(function (e, details) {
+                        assert.equal(e, null);
+                        assert.notEqual(details, null);
+
+                        var diff = _.merge(details.pop().diff, {_id: obj._id, __v: obj.__v});
+
+                        assert.strictEqual(diff.ignoredField, undefined);
+                        
+                        var withoutIgnored = obj.toObject();
+                        delete withoutIgnored['ignoredField'];
+                        
+                        assert.deepEqual(withoutIgnored, diff);
+                        assert.equal(obj.testString, 'My default value');
+                        
+                        done();
+                    });
                 });
             });
         });
 
-        it('An historical record should be created when a document is modified.', function(done){
+        it('The post hook for findOneAndUpdate should call historical.js', function(done){
 
             var update = {
                 $set: {
                     testObject: {
                         testObjectElement: 'this is a shift in concsiousness'
-                    }
+                    },
+                    testString: 'new test String'
                 }
             }
 
             var query = {
-                testObject: {
-                    testObjectElement: 'something wicked this way comes'
-                }
+                testNumber: 424,
             }
 
             TestModel.findOneAndUpdate(query, update, function (e, obj) {
@@ -205,13 +206,37 @@ describe('Document', function(){
                 assert.notEqual(obj, null);
 
                 sub_document = obj;
+                done();
+            });
+        });
+
+        it('An historical record should be created when a document is modified.', function(done){
+
+            var query = {
+                testObject: {
+                    testObjectElement: 'this is a shift in concsiousness'
+                },
+                testString: 'new test String'
+            }
+
+            var diffTest = {
+                testObject: {
+                    testObjectElement: 'this is a shift in concsiousness'
+                },
+                testString: 'new test String'
+            }
+
+            TestModel.findOne(query, function (e, obj) {
+                assert.equal(e, null);
+                assert.notEqual(obj, null);
+
+                sub_document = obj;
 
                 obj.historical(function (e, details) {
                     assert.equal(e, null);
                     assert.notEqual(details, null);
 
-                    assert.deepEqual(details.pop().diff, {testObject:{testObjectElement: 'something wicked this way comes'}});
-
+                    assert.deepEqual(details.pop().diff, diffTest);
                     done();
                 });
             });

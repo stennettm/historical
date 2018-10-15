@@ -75,6 +75,68 @@ module.exports = function (schema, options) {
         o[a[a.length - 1]] = v;
     };
 
+    // from https://stackoverflow.com/questions/10827108/mongoose-check-if-object-is-mongoose-object
+    // by Lukasz Czerwinski
+    //
+    var checkMongooseObject = function (v) {
+        if (v === null) {
+            return false;
+        }
+        return _.get(v, 'constructor.base') instanceof mongoose.Mongoose;
+    }
+
+    //CODE BETWEEN THESE COMMENT LINES WAS ADAPTED FROM THE MONGOOSE CODEBASE
+
+    var shouldFlatten = function (val) {
+        return val &&
+            typeof val === 'object' &&
+            !(val instanceof Date) &&
+            !(val instanceof ObjectId) &&
+            (!Array.isArray(val) || val.length > 0) &&
+            !(val instanceof Buffer);
+    }
+
+    var _getPaths = function (update, path, result) {
+        var keys = Object.keys(update || {});
+        var numKeys = keys.length;
+        result = result || [];
+        path = path ? path + '.' : '';
+
+        for (var i = 0; i < numKeys; ++i) {
+            var key = keys[i];
+            var val = update[key];
+
+            result.push(path + key);
+            if (checkMongooseObject(val) && !Buffer.isBuffer(val)) {
+                val = val.toObject({ transform: false, virtuals: false });
+            }
+            if (shouldFlatten(val)) {
+                _getPaths(val, path + key, result);
+            }
+        }
+
+        return result;
+    }
+
+    var getPaths = function (update) {
+        var res = [];
+        var keys = Object.keys(update);
+        var withoutDollarKeys = {};
+        for (var i = 0; i < keys.length; ++i) {
+            var key = keys[i];
+            if (key.startsWith('$')) {
+                _getPaths(update[key], '', res); 
+                continue;
+            }
+            withoutDollarKeys[key] = update[key];
+
+        }
+        _getPaths(withoutDollarKeys, '', res);
+
+        return res;
+    }
+    //CODE BETWEEN THESE COMMENT LINES WAS ADAPTED FROM THE MONGOOSE CODEBASE
+
     schema.pre('save', function (next) {
         var me              = this,
             HistoricalModel = getHistoricalModel(me),
@@ -103,13 +165,15 @@ module.exports = function (schema, options) {
     });
 
 
-    schema.pre('findOneAndUpdate', function (next) {
-        var query = this.getQuery();
-        this.model.findOne(query).exec().then(function(doc) {
+    schema.post('findOneAndUpdate', function (next) {
+        var update = this.getUpdate().$set,
+            pathing = getPaths(this.getUpdate());
+
+        this.model.findOne(update).exec().then(function(doc) {
             var me              = doc,
                 HistoricalModel = getHistoricalModel(me),
-                modified        = _.uniq(me.modifiedPaths()),
-                diff            = doc.isNew ? me.toObject({virtuals: false}) : query;
+                modified        = _.uniq(pathing),
+                diff            = doc.isNew ? me.toObject({virtuals: false}) : {};
 
             if (!doc.isNew) {
                 modified.forEach(function (index) {
@@ -132,7 +196,7 @@ module.exports = function (schema, options) {
 
             historical.save(next);
         }).catch(function (err) {
-            console.error('ERROR: ' + err);
+            next(err);
         });
     });
 
