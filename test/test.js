@@ -43,7 +43,7 @@ describe('Document', function(){
                     assert.notEqual(details, null);
 
                     var diff = _.merge(details.pop().diff, {_id: obj._id, __v: obj.__v});
-                    
+
                     assert.strictEqual(diff.ignoredField, undefined);
                     
                     var withoutIgnored = obj.toObject();
@@ -143,6 +143,101 @@ describe('Document', function(){
                             done();
                         });
                     });
+                });
+            });
+        });
+    });
+
+    describe('#findOneAndUpdate()', function(){
+        var sub_document = new TestModel({
+            testNumber: 424,
+            testArray: ['test3', 'test4'],
+            testObject: {
+                testObjectElement: 'something wicked this way comes'
+            },
+            ignoredField: 'Ignore me'
+        });
+
+        it('An historical record should be created when a document is saved.', function(done){
+            TestModel.deleteMany({}, function(){
+                sub_document.save(function (e, obj) {
+                    assert.equal(e, null);
+                    assert.notEqual(obj, null);
+
+                    sub_document = obj;
+
+                    obj.historical(function (e, details) {
+                        assert.equal(e, null);
+                        assert.notEqual(details, null);
+
+                        var diff = _.merge(details.pop().diff, {_id: obj._id, __v: obj.__v});
+
+                        assert.strictEqual(diff.ignoredField, undefined);
+                        
+                        var withoutIgnored = obj.toObject();
+                        delete withoutIgnored['ignoredField'];
+                        
+                        assert.deepEqual(withoutIgnored, diff);
+                        assert.equal(obj.testString, 'My default value');
+                        
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('The post hook for findOneAndUpdate should call historical.js', function(done){
+
+            var update = {
+                $set: {
+                    testObject: {
+                        testObjectElement: 'this is a shift in concsiousness'
+                    },
+                    testString: 'new test String'
+                }
+            }
+
+            var query = {
+                testNumber: 424,
+            }
+
+            TestModel.findOneAndUpdate(query, update, function (e, obj) {
+                assert.equal(e, null);
+                assert.notEqual(obj, null);
+
+                sub_document = obj;
+                done();
+            });
+        });
+
+        it('An historical record should be created when a document is modified.', function(done){
+
+            var query = {
+                testObject: {
+                    testObjectElement: 'this is a shift in concsiousness'
+                },
+                testString: 'new test String'
+            }
+
+            var diffTest = {
+                testObject: {
+                    testObjectElement: 'this is a shift in concsiousness'
+                },
+                testString: 'new test String'
+            }
+
+            TestModel.findOne(query, function (e, obj) {
+                assert.equal(e, null);
+                assert.notEqual(obj, null);
+
+                sub_document = obj;
+
+                obj.historical(function (e, details) {
+                    assert.equal(e, null);
+                    assert.notEqual(details, null);
+
+                    assert.deepEqual(details.pop().diff, diffTest);
+                    done();
                 });
             });
         });

@@ -75,6 +75,73 @@ module.exports = function (schema, options) {
         o[a[a.length - 1]] = v;
     };
 
+    // from https://stackoverflow.com/questions/10827108/mongoose-check-if-object-is-mongoose-object
+    // by Lukasz Czerwinski
+    var checkMongooseObject = function (v) {
+        if (v === null) {
+            return false;
+        }
+        return _.get(v, 'constructor.base') instanceof mongoose.Mongoose;
+    }
+
+    // from https://stackoverflow.com/questions/646628/how-to-check-if-a-string-startswith-another-string
+    // by momo
+    var startsWith = function (str, word) {
+        return str.lastIndexOf(word, 0) === 0;
+    }
+
+    //CODE BETWEEN THESE COMMENT LINES WAS ADAPTED FROM THE MONGOOSE CODEBASE
+
+    var shouldFlatten = function (val) {
+        return val &&
+            typeof val === 'object' &&
+            !(val instanceof Date) &&
+            !(val instanceof ObjectId) &&
+            (!Array.isArray(val) || val.length > 0) &&
+            !(val instanceof Buffer);
+    }
+
+    var _getPaths = function (update, path, result) {
+        var keys = Object.keys(update || {});
+        var numKeys = keys.length;
+        result = result || [];
+        path = path ? path + '.' : '';
+
+        for (var i = 0; i < numKeys; ++i) {
+            var key = keys[i];
+            var val = update[key];
+
+            result.push(path + key);
+            if (checkMongooseObject(val) && !Buffer.isBuffer(val)) {
+                val = val.toObject({ transform: false, virtuals: false });
+            }
+            if (shouldFlatten(val)) {
+                _getPaths(val, path + key, result);
+            }
+        }
+
+        return result;
+    }
+
+    var getPaths = function (update) {
+        var res = [];
+        var keys = Object.keys(update);
+        var withoutDollarKeys = {};
+        for (var i = 0; i < keys.length; ++i) {
+            var key = keys[i];
+            if (startsWith(key, '$')) {
+                _getPaths(update[key], '', res); 
+                continue;
+            }
+            withoutDollarKeys[key] = update[key];
+
+        }
+        _getPaths(withoutDollarKeys, '', res);
+
+        return res;
+    }
+    //CODE BETWEEN THESE COMMENT LINES WAS ADAPTED FROM THE MONGOOSE CODEBASE
+
     schema.pre('save', function (next) {
         var me              = this,
             HistoricalModel = getHistoricalModel(me),
@@ -100,6 +167,50 @@ module.exports = function (schema, options) {
             diff: diff
         });
         historical.save(next);
+    });
+
+
+    schema.post('findOneAndUpdate', function (next) {
+        var update = this.getUpdate().$set,
+            pathing = getPaths(this.getUpdate());
+
+        this.model.findOne(update).exec().then(function(doc) {
+            var me              = doc,
+                HistoricalModel = getHistoricalModel(me),
+                modified        = _.uniq(pathing),
+                diff            = doc.isNew ? me.toObject({virtuals: false}) : {};
+
+            if (!doc.isNew) {
+                modified.forEach(function (index) {
+                    var value = read(me.toObject({virtuals: false}), index);
+                    if (_.isPlainObject(value)) {
+                        return;
+                    }
+                    if (value === undefined) {
+                        write(diff, index, null);
+                        return;
+                    }
+                    write(diff, index, value);
+                });
+            }
+
+            var historical = new HistoricalModel({
+                document: me[primaryKeyName],
+                diff: diff
+            });
+
+            historical.save(next);
+        }).catch(function (err) {
+            next(err);
+        });
+    });
+
+    schema.pre('update', function (next) {
+        next();
+    });
+
+    schema.pre('findOneAndRemove', function (next) {
+        next();
     });
 
     schema.pre('remove', function (next) {
