@@ -242,4 +242,160 @@ describe('Document', function(){
             });
         });
     });
+
+    describe('#update()', function(){
+        var sub_document = new TestModel({
+            testNumber: 424,
+            testArray: ['test3', 'test4'],
+            testObject: {
+                testObjectElement: 'starting test object'
+            },
+            ignoredField: 'Ignore me'
+        });
+
+        it('An historical record should be created when a document is saved.', function(done){
+            TestModel.deleteMany({}, function(){
+                sub_document.save(function (e, obj) {
+                    assert.equal(e, null);
+                    assert.notEqual(obj, null);
+
+                    sub_document = obj;
+
+                    obj.historical(function (e, details) {
+                        assert.equal(e, null);
+                        assert.notEqual(details, null);
+
+                        var diff = _.merge(details.pop().diff, {_id: obj._id, __v: obj.__v});
+
+                        assert.strictEqual(diff.ignoredField, undefined);
+                        
+                        var withoutIgnored = obj.toObject();
+                        delete withoutIgnored['ignoredField'];
+                        
+                        assert.deepEqual(withoutIgnored, diff);
+                        assert.equal(obj.testString, 'My default value');
+                        
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('The post hook for update should call historical.js', function(done){
+
+            var update = {
+                $set: {
+                    testObject: {
+                        testObjectElement: 'new test object'
+                    },
+                    testString: 'new test string'
+                }
+            }
+
+            var query = {
+                testNumber: 424,
+            }
+
+            TestModel.where(query).update(update, function (e, obj) {
+                assert.equal(e, null);
+                assert.notEqual(obj, null);
+
+                sub_document = obj;
+                done();
+            });
+        });
+
+        it('An historical record should be created when a document is modified.', function(done){
+
+            var query = {
+                testObject: {
+                    testObjectElement: 'new test object'
+                },
+                testString: 'new test string'
+            }
+
+            var diffTest = {
+                testObject: {
+                    testObjectElement: 'new test object'
+                },
+                testString: 'new test string'
+            }
+
+            setTimeout(function(){
+                TestModel.findOne(query, function (e, obj) {
+                    assert.equal(e, null);
+                    assert.notEqual(obj, null);
+
+                    sub_document = obj;
+
+                    obj.historical(function (e, details) {
+                        assert.equal(e, null);
+                        assert.notEqual(details, null);
+
+                        assert.deepEqual(details.pop().diff, diffTest);
+                        done();
+                    });
+                });
+            }, 100);
+        });
+    });
+
+    describe('#findOneAndRemove()', function(){
+        var sub_document = new TestModel({
+            testNumber: 424,
+            testArray: ['test3', 'test4'],
+            testObject: {
+                testObjectElement: 'starting test object'
+            },
+            ignoredField: 'Ignore me'
+        });
+
+        it('An historical record should be created when a document is saved.', function(done){
+            TestModel.deleteMany({}, function(){
+                sub_document.save(function (e, obj) {
+                    assert.equal(e, null);
+                    assert.notEqual(obj, null);
+
+                    sub_document = obj;
+
+                    obj.historical(function (e, details) {
+                        assert.equal(e, null);
+                        assert.notEqual(details, null);
+
+                        var diff = _.merge(details.pop().diff, {_id: obj._id, __v: obj.__v});
+
+                        assert.strictEqual(diff.ignoredField, undefined);
+                        
+                        var withoutIgnored = obj.toObject();
+                        delete withoutIgnored['ignoredField'];
+                        
+                        assert.deepEqual(withoutIgnored, diff);
+                        assert.equal(obj.testString, 'My default value');
+                        
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('An historical record should be null when a document is removed.', function(done){
+            TestModel.findOneAndRemove({_id: sub_document.id}, function(e, obj){
+
+                assert.equal(e, null);
+                assert.notEqual(obj, null);
+
+                obj.historical(function(e, details){
+                    assert.equal(e, null);
+                    assert.notEqual(obj, null);
+
+                    assert.equal(details.pop().diff, null);
+
+                    document.historicalRestore(new Date(), function(e, restored){
+                        assert.equal(restored, null);
+                        done();
+                    });
+                });
+            });
+        });
+    });
 });

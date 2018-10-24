@@ -205,12 +205,55 @@ module.exports = function (schema, options) {
         });
     });
 
-    schema.pre('update', function (next) {
-        next();
+    schema.post('update', function (next) {
+        var update = this.getUpdate().$set,
+            pathing = getPaths(this.getUpdate());
+
+        this.model.findOne(update).exec().then(function(doc) {
+            var me              = doc,
+                HistoricalModel = getHistoricalModel(me),
+                modified        = _.uniq(pathing),
+                diff            = doc.isNew ? me.toObject({virtuals: false}) : {};
+
+            if (!doc.isNew) {
+                modified.forEach(function (index) {
+                    var value = read(me.toObject({virtuals: false}), index);
+                    if (_.isPlainObject(value)) {
+                        return;
+                    }
+                    if (value === undefined) {
+                        write(diff, index, null);
+                        return;
+                    }
+                    write(diff, index, value);
+                });
+            }
+
+            var historical = new HistoricalModel({
+                document: me[primaryKeyName],
+                diff: diff
+            });
+
+            historical.save(next);
+        }).catch(function (err) {
+            next(err);
+        });
     });
 
     schema.pre('findOneAndRemove', function (next) {
-        next();
+        var query = this.getQuery();
+        this.model.findOne(query).exec().then(function(doc) {
+            var me              = doc,
+                HistoricalModel = getHistoricalModel(me);
+
+            var historical = new HistoricalModel({
+                document: me[primaryKeyName],
+                diff: null
+            });
+            historical.save(next);
+        }).catch(function (err){
+            next(err);
+        });
     });
 
     schema.pre('remove', function (next) {
