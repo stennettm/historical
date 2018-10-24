@@ -207,30 +207,32 @@ module.exports = function (schema, options) {
         var update = this.getUpdate().$set,
             pathing = getPaths(this.getUpdate());
 
-        this.model.find(update).exec().each(function(doc) {
-            var me              = doc,
-                HistoricalModel = getHistoricalModel(me),
-                modified        = _.uniq(pathing),
-                diff            = {};
+        this.model.find(update).exec().then(function(docs) {
+            return Promise.map(docs, function(doc){
+                var me              = doc,
+                    HistoricalModel = getHistoricalModel(me),
+                    modified        = _.uniq(pathing),
+                    diff            = {};
 
-            modified.forEach(function (index) {
-                var value = read(me.toObject({virtuals: false}), index);
-                if (_.isPlainObject(value)) {
-                    return;
-                }
-                if (value === undefined) {
-                    write(diff, index, null);
-                    return;
-                }
-                write(diff, index, value);
+                modified.forEach(function (index) {
+                    var value = read(me.toObject({virtuals: false}), index);
+                    if (_.isPlainObject(value)) {
+                        return;
+                    }
+                    if (value === undefined) {
+                        write(diff, index, null);
+                        return;
+                    }
+                    write(diff, index, value);
+                });
+
+                var historical = new HistoricalModel({
+                    document: me[primaryKeyName],
+                    diff: diff
+                });
+
+                return historical.save();
             });
-
-            var historical = new HistoricalModel({
-                document: me[primaryKeyName],
-                diff: diff
-            });
-
-            return historical.save();
         }).then(function() {
             next();
         }).catch(next);
