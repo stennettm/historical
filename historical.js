@@ -205,7 +205,7 @@ module.exports = function (schema, options) {
         });
     });
 
-    schema.post('update', function (next) {
+    schema.post('update', function () {
         var update = this.getUpdate().$set,
             pathing = getPaths(this.getUpdate());
 
@@ -235,10 +235,6 @@ module.exports = function (schema, options) {
 
                 return historical.save();
             });
-        }).then(function() {
-            next();
-        }).catch(function(e) {
-            next(e);
         });
     });
 
