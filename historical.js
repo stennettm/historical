@@ -200,7 +200,9 @@ module.exports = function (schema, options) {
             });
 
             historical.save(next);
-        }).catch(next);
+        }).catch(function(e) {
+            next(e);
+        });
     });
 
     schema.post('update', function (next) {
@@ -235,7 +237,9 @@ module.exports = function (schema, options) {
             });
         }).then(function() {
             next();
-        }).catch(next);
+        }).catch(function(e) {
+            next(e);
+        });
     });
 
     schema.pre('findOneAndRemove', function (next) {
@@ -249,7 +253,9 @@ module.exports = function (schema, options) {
                 diff: null
             });
             historical.save(next);
-        }).catch(next);
+        }).catch(function(e) {
+            next(e);
+        });
     });
 
     schema.pre('remove', function (next) {
