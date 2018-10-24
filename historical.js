@@ -208,7 +208,7 @@ module.exports = function (schema, options) {
             pathing = getPaths(this.getUpdate());
 
         this.model.find(update).exec().then(function(docs) {
-            return Promise.map(docs, function(doc){
+            return Promise.each(docs, function(doc){
                 var me              = doc,
                     HistoricalModel = getHistoricalModel(me),
                     modified        = _.uniq(pathing),
