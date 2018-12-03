@@ -26,10 +26,10 @@ module.exports = function (schema, options) {
                 timestamp: {type: Date, default: Date.now, index: true},
                 diff: Schema.Types.Mixed
             });
-            
+
             schema.pre('save', function(next) {
                 var diff = this.diff;
-                
+
                 if(_.isArray(ignoredFields)) {
                     ignoredFields.forEach(function(field){
                         if(_.has(diff, field)) {
@@ -37,14 +37,14 @@ module.exports = function (schema, options) {
                         }
                     });
                 }
-                
+
                 this.diff = diff;
                 next();
             });
-            
+
             return schema;
         };
-        
+
         models[model.constructor.modelName] = models[model.constructor.modelName] ||
             connection.model(name, createHistoricalSchema());
 
@@ -130,7 +130,7 @@ module.exports = function (schema, options) {
         for (var i = 0; i < keys.length; ++i) {
             var key = keys[i];
             if (startsWith(key, '$')) {
-                _getPaths(update[key], '', res); 
+                _getPaths(update[key], '', res);
                 continue;
             }
             withoutDollarKeys[key] = update[key];
@@ -200,10 +200,11 @@ module.exports = function (schema, options) {
             });
 
             historical.save(next);
-        }).catch(function (err) {
-            next(err);
+        }).catch(function(e) {
+            next(e);
         });
     });
+
 
     schema.post('findByIdAndUpdate', function (next) {
         var update = this.getUpdate().$set,
@@ -240,17 +241,19 @@ module.exports = function (schema, options) {
         });
     });
 
-    schema.post('update', function (next) {
+
+    schema.post('update', function () {
+
         var update = this.getUpdate().$set,
             pathing = getPaths(this.getUpdate());
 
-        this.model.findOne(update).exec().then(function(doc) {
-            var me              = doc,
-                HistoricalModel = getHistoricalModel(me),
-                modified        = _.uniq(pathing),
-                diff            = doc.isNew ? me.toObject({virtuals: false}) : {};
+        this.model.find(update).exec().then(function(docs) {
+            return Promise.each(docs, function(doc){
+                var me              = doc,
+                    HistoricalModel = getHistoricalModel(me),
+                    modified        = _.uniq(pathing),
+                    diff            = {};
 
-            if (!doc.isNew) {
                 modified.forEach(function (index) {
                     var value = read(me.toObject({virtuals: false}), index);
                     if (_.isPlainObject(value)) {
@@ -262,16 +265,14 @@ module.exports = function (schema, options) {
                     }
                     write(diff, index, value);
                 });
-            }
 
-            var historical = new HistoricalModel({
-                document: me[primaryKeyName],
-                diff: diff
+                var historical = new HistoricalModel({
+                    document: me[primaryKeyName],
+                    diff: diff
+                });
+
+                return historical.save();
             });
-
-            historical.save(next);
-        }).catch(function (err) {
-            next(err);
         });
     });
 
@@ -286,8 +287,8 @@ module.exports = function (schema, options) {
                 diff: null
             });
             historical.save(next);
-        }).catch(function (err){
-            next(err);
+        }).catch(function(e) {
+            next(e);
         });
     });
 
