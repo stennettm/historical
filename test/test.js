@@ -226,20 +226,22 @@ describe('Document', function(){
                 testString: 'new test String'
             }
 
-            TestModel.findOne(query, function (e, obj) {
-                assert.equal(e, null);
-                assert.notEqual(obj, null);
-
-                sub_document = obj;
-
-                obj.historical(function (e, details) {
+            setTimeout(function() {
+                TestModel.findOne(query, function (e, obj) {
                     assert.equal(e, null);
-                    assert.notEqual(details, null);
+                    assert.notEqual(obj, null);
 
-                    assert.deepEqual(details.pop().diff, diffTest);
-                    done();
+                    sub_document = obj;
+
+                    obj.historical(function (e, details) {
+                        assert.equal(e, null);
+                        assert.notEqual(details, null);
+
+                        assert.deepEqual(details.pop().diff, diffTest);
+                        done();
+                    });
                 });
-            });
+            }, 100);
         });
     });
 
