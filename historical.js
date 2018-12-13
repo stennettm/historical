@@ -211,20 +211,17 @@ module.exports = function (schema, options) {
 
         // The below function was taken from stackoverflow and written by Benjamin Gruenbaum
         // https://stackoverflow.com/questions/41607804/promise-each-without-bluebird
-        /*
-        Promise.each = async function(arr, fn) {
-            for(const item of arr) await fn(item);
-        }
-        */
+
         Promise.each = function(arr, fn) { // take an array and a function
-        // invalid input
-        if(!Array.isArray(arr)) return Promise.reject(new Error("Non array passed to each"));
-        // empty case
-        if(arr.length === 0) return Promise.resolve(); 
-        return arr.reduce(function(prev, cur) { 
-            return prev.then(() => fn(cur))
-        }, Promise.resolve());
+            // invalid input
+            if(!Array.isArray(arr)) return Promise.reject(new Error("Non array passed to each"));
+            // empty case
+            if(arr.length === 0) return Promise.resolve(); 
+            return arr.reduce(function(prev, cur) { 
+                return prev.then(() => fn(cur))
+            }, Promise.resolve());
         }
+
         this.model.find(update).exec().then(function(docs) {
             return Promise.each(docs, function(doc){
                 var me              = doc,
