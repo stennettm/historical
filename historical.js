@@ -209,6 +209,12 @@ module.exports = function (schema, options) {
         var update = this.getUpdate().$set,
             pathing = getPaths(this.getUpdate());
 
+        // The below function was taken from stackoverflow and written by Benjamin Gruenbaum
+        // https://stackoverflow.com/questions/41607804/promise-each-without-bluebird
+        Promise.each = async function(arr, fn) {
+            for(const item of arr) await fn(item);
+        }
+
         this.model.find(update).exec().then(function(docs) {
             return Promise.each(docs, function(doc){
                 var me              = doc,
@@ -235,6 +241,8 @@ module.exports = function (schema, options) {
 
                 return historical.save();
             });
+        }).catch(function(e) {
+            console.error('update error', e);
         });
     });
 
