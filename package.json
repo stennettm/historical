@@ -30,7 +30,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --harmony"
   },
   "devDependencies": {
     "mocha": "^2.3.4"
