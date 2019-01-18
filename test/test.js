@@ -158,34 +158,6 @@ describe('Document', function(){
             ignoredField: 'Ignore me'
         });
 
-        it('An historical record should be created when a document is saved.', function(done){
-            TestModel.deleteMany({}, function(){
-                sub_document.save(function (e, obj) {
-                    assert.equal(e, null);
-                    assert.notEqual(obj, null);
-
-                    sub_document = obj;
-
-                    obj.historical(function (e, details) {
-                        assert.equal(e, null);
-                        assert.notEqual(details, null);
-
-                        var diff = _.merge(details.pop().diff, {_id: obj._id, __v: obj.__v});
-
-                        assert.strictEqual(diff.ignoredField, undefined);
-                        
-                        var withoutIgnored = obj.toObject();
-                        delete withoutIgnored['ignoredField'];
-                        
-                        assert.deepEqual(withoutIgnored, diff);
-                        assert.equal(obj.testString, 'My default value');
-                        
-                        done();
-                    });
-                });
-            });
-        });
-
         it('The post hook for findOneAndUpdate should call historical.js', function(done){
 
             var update = {
