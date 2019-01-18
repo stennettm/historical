@@ -9,7 +9,7 @@ Historical requires a primary key (typically `_id`) to be present in your schema
 Installation
 ------------
 
-`npm install historical@^1.0.0`
+`npm install historical@^2.0.0`
 
 Getting Started
 ---------------
