@@ -33,6 +33,6 @@
     "test": "mocha"
   },
   "devDependencies": {
-    "mocha": "^2.3.4"
+    "mocha": "^10.1.0"
   }
 }
